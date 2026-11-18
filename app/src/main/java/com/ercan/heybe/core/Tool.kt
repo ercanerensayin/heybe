@@ -1,0 +1,46 @@
+package com.ercan.heybe.core
+
+import java.text.Normalizer
+import java.util.Locale
+
+enum class Category(val title: String) { BELGE("Belge"), MEDYA("Medya"), HESAP("Hesap") }
+
+data class Tool(
+    val id: String,
+    val name: String,
+    val description: String,
+    val category: Category,
+    val keywords: List<String> = emptyList(),
+)
+
+object ToolRegistry {
+    val tools: List<Tool> = listOf(
+        Tool("pdf_birlestir", "PDF Birleştir / Böl", "Birden çok PDF'i tek dosya yap ya da sayfalara ayır", Category.BELGE, listOf("pdf", "birleştir", "böl", "sayfa")),
+        Tool("pdf_sikistir", "PDF Sıkıştır", "PDF dosyasının boyutunu küçült", Category.BELGE, listOf("pdf", "sıkıştır", "küçült", "boyut")),
+        Tool("gorsel_pdf", "Görselden PDF", "Fotoğrafları tek PDF'te topla", Category.BELGE, listOf("pdf", "fotoğraf", "resim", "görsel", "tarama")),
+        Tool("qr", "QR / Barkod", "QR ve barkod oku ya da oluştur", Category.BELGE, listOf("qr", "barkod", "kare kod", "tara")),
+        Tool("video_indir", "Video İndir", "Linkten en yüksek kalitede video ya da MP3 indir", Category.MEDYA, listOf("video", "indir", "youtube", "instagram", "mp3", "müzik")),
+        Tool("gorsel_sikistir", "Görsel Sıkıştır", "Fotoğrafları küçült ve yeniden boyutlandır", Category.MEDYA, listOf("görsel", "fotoğraf", "resim", "sıkıştır", "boyut", "jpg")),
+        Tool("kredi_kdv", "Kredi / KDV", "Kredi taksiti ve KDV hesapla", Category.HESAP, listOf("kredi", "kdv", "faiz", "taksit", "vergi", "hesap")),
+    )
+
+    fun byId(id: String): Tool? = tools.firstOrNull { it.id == id }
+
+    /** Türkçe karakterlere duyarsız arama: "sikistir" de "Sıkıştır"ı bulur. */
+    fun search(query: String): List<Tool> {
+        val q = normalize(query)
+        if (q.isBlank()) return tools
+        val parts = q.split(" ").filter { it.isNotBlank() }
+        return tools.filter { t ->
+            val hay = normalize(t.name + " " + t.description + " " + t.keywords.joinToString(" ") + " " + t.category.title)
+            parts.all { hay.contains(it) }
+        }
+    }
+
+    fun normalize(s: String): String {
+        val lower = s.lowercase(Locale.forLanguageTag("tr"))
+            .replace('ı', 'i').replace('ş', 's').replace('ğ', 'g')
+            .replace('ü', 'u').replace('ö', 'o').replace('ç', 'c')
+        return Normalizer.normalize(lower, Normalizer.Form.NFD).replace(Regex("\\p{M}+"), "").trim()
+    }
+}
