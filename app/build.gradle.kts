@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId = "com.ercan.heybe"
         minSdk = 26; targetSdk = 34
-        versionCode = 4; versionName = "0.4"
+        versionCode = 5; versionName = "0.5"
         ndk { abiFilters += listOf("arm64-v8a") }
     }
     signingConfigs {
@@ -41,5 +41,7 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.10.0")
     implementation("io.github.junkfood02.youtubedl-android:library:0.18.1")
     implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
     testImplementation("junit:junit:4.13.2")
 }

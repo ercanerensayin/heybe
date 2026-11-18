@@ -118,6 +118,9 @@ fun HeybeRoot(openRequest: OpenRequest? = null, onOpenHandled: () -> Unit = {}) 
                             onStarted = {
                             nav.navigate("downloads") { popUpTo("home"); launchSingleTop = true }
                         })
+                        "pdf_birlestir" -> com.ercan.heybe.tools.pdf.PdfMergeSplitScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() })
+                        "pdf_sikistir" -> com.ercan.heybe.tools.pdf.PdfCompressScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() })
+                        "gorsel_pdf" -> com.ercan.heybe.tools.pdf.ImagesToPdfScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() })
                         else -> ComingSoon(tool)
                     }
                 }
