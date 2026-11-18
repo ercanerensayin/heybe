@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("com.google.devtools.ksp")
 }
 android {
     namespace = "com.ercan.heybe"
@@ -9,7 +10,7 @@ android {
     defaultConfig {
         applicationId = "com.ercan.heybe"
         minSdk = 26; targetSdk = 34
-        versionCode = 1; versionName = "0.1"
+        versionCode = 2; versionName = "0.2"
     }
     signingConfigs {
         getByName("debug") {
@@ -32,5 +33,8 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.navigation:navigation-compose:2.8.5")
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
     testImplementation("junit:junit:4.13.2")
 }

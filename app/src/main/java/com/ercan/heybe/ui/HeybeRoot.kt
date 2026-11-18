@@ -98,8 +98,8 @@ fun HeybeRoot() {
     ) { pad ->
         NavHost(nav, startDestination = "home", modifier = Modifier.padding(pad)) {
             composable("home") { HomeScreen(nav) }
-            composable("downloads") { PlaceholderPage("İndirilenler", "Bütün araçların işlem geçmişi ve video indirmelerinin ilerlemesi burada görünecek (2. adım).") }
-            composable("settings") { PlaceholderPage("Ayarlar", "Paylaş menüsü kısayolu, güncellemeler ve bileşen yönetimi burada olacak.\n\nSürüm 0.1 — iskelet") }
+            composable("downloads") { DownloadsScreen() }
+            composable("settings") { SettingsScreen() }
             composable("tool/{id}") { e ->
                 val tool = ToolRegistry.byId(e.arguments?.getString("id") ?: "")
                 ToolScreen(tool, onBack = { nav.popBackStack() })
@@ -147,7 +147,7 @@ private fun HomeScreen(nav: NavHostController) {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(recentTools, key = { "r_" + it.id }) { t ->
                             AssistChip(onClick = { open(t) }, label = { Text(t.name) },
-                                leadingIcon = { Badge(t, 20) })
+                                leadingIcon = { ToolBadge(t, 20) })
                         }
                     }
                 }
@@ -175,21 +175,10 @@ private fun SectionTitle(text: String, color: Color = MaterialTheme.colorScheme.
 }
 
 @Composable
-private fun Badge(tool: Tool, sizeDp: Int) {
-    Box(
-        Modifier.size(sizeDp.dp).background(tool.category.color(), CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(tool.name.take(1), color = Color.White, fontWeight = FontWeight.Bold,
-            style = if (sizeDp < 30) MaterialTheme.typography.labelSmall else MaterialTheme.typography.titleMedium)
-    }
-}
-
-@Composable
 private fun ToolCard(tool: Tool, fav: Boolean, onOpen: (Tool) -> Unit, onFav: (Tool) -> Unit) {
     Card(Modifier.fillMaxWidth().clickable { onOpen(tool) }) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Badge(tool, 40)
+            ToolBadge(tool, 40)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(tool.name, style = MaterialTheme.typography.titleMedium)
@@ -205,15 +194,6 @@ private fun ToolCard(tool: Tool, fav: Boolean, onOpen: (Tool) -> Unit, onFav: (T
     }
 }
 
-@Composable
-private fun PlaceholderPage(title: String, body: String) {
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.padding(8.dp))
-        Text(body, style = MaterialTheme.typography.bodyLarge)
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ToolScreen(tool: Tool?, onBack: () -> Unit) {
@@ -224,7 +204,7 @@ private fun ToolScreen(tool: Tool?, onBack: () -> Unit) {
         )
         Column(Modifier.padding(16.dp)) {
             if (tool != null) {
-                Badge(tool, 56)
+                ToolBadge(tool, 56)
                 Spacer(Modifier.padding(8.dp))
                 Text(tool.description, style = MaterialTheme.typography.bodyLarge)
                 Spacer(Modifier.padding(8.dp))
