@@ -147,6 +147,12 @@ private fun HistoryRow(item: HistoryItem) {
                     }
                 })
             }
+            if (item.status == Status.RUNNING) {
+                DropdownMenuItem(text = { Text("İptal et") }, onClick = {
+                    menu = false
+                    com.ercan.heybe.tools.video.DownloadWorker.cancel(ctx, item.id)
+                })
+            }
             DropdownMenuItem(text = { Text("Geçmişten kaldır") }, onClick = {
                 menu = false
                 scope.launch { withContext(Dispatchers.IO) { HeybeDb.get(ctx).history().delete(item.id) } }

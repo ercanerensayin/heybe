@@ -102,7 +102,14 @@ fun HeybeRoot() {
             composable("settings") { SettingsScreen() }
             composable("tool/{id}") { e ->
                 val tool = ToolRegistry.byId(e.arguments?.getString("id") ?: "")
-                ToolScreen(tool, onBack = { nav.popBackStack() })
+                ToolScreen(tool, onBack = { nav.popBackStack() }) {
+                    when (tool?.id) {
+                        "video_indir" -> com.ercan.heybe.tools.video.VideoScreen(onStarted = {
+                            nav.navigate("downloads") { popUpTo("home"); launchSingleTop = true }
+                        })
+                        else -> ComingSoon(tool)
+                    }
+                }
             }
         }
     }
@@ -196,21 +203,26 @@ private fun ToolCard(tool: Tool, fav: Boolean, onOpen: (Tool) -> Unit, onFav: (T
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ToolScreen(tool: Tool?, onBack: () -> Unit) {
+private fun ToolScreen(tool: Tool?, onBack: () -> Unit, content: @Composable () -> Unit) {
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(tool?.name ?: "Araç") },
             navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Geri") } },
         )
-        Column(Modifier.padding(16.dp)) {
-            if (tool != null) {
-                ToolBadge(tool, 56)
-                Spacer(Modifier.padding(8.dp))
-                Text(tool.description, style = MaterialTheme.typography.bodyLarge)
-                Spacer(Modifier.padding(8.dp))
-            }
-            Text("Bu araç yol haritasının sonraki adımlarında eklenecek.",
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        content()
+    }
+}
+
+@Composable
+private fun ComingSoon(tool: Tool?) {
+    Column(Modifier.padding(16.dp)) {
+        if (tool != null) {
+            ToolBadge(tool, 56)
+            Spacer(Modifier.padding(8.dp))
+            Text(tool.description, style = MaterialTheme.typography.bodyLarge)
+            Spacer(Modifier.padding(8.dp))
         }
+        Text("Bu araç yol haritasının sonraki adımlarında eklenecek.",
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

@@ -6,6 +6,7 @@ import java.io.File
 class HeybeApp : Application() {
     override fun onCreate() {
         super.onCreate()
+        com.ercan.heybe.tools.video.DownloadWorker.createChannel(this)
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
             runCatching { crashFile().writeText(e.stackTraceToString()) }

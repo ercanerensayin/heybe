@@ -64,7 +64,22 @@ fun SettingsScreen() {
         }) { Text("Deneme dosyası kaydet") }
 
         HorizontalDivider(Modifier.padding(vertical = 16.dp))
-        Text("Paylaş menüsü, güncellemeler ve bileşen (yt-dlp) yönetimi sonraki adımlarda buraya eklenecek.",
+        Text("Video indirici (yt-dlp)", style = MaterialTheme.typography.titleMedium)
+        Text("yt-dlp haftada bir kendiliğinden güncellenir; indirme başarısız olursa önce güncellenip bir kez daha denenir.",
+            style = MaterialTheme.typography.bodyMedium)
+        OutlinedButton(onClick = {
+            Toast.makeText(ctx, "yt-dlp hazırlanıyor ve güncelleniyor…", Toast.LENGTH_SHORT).show()
+            scope.launch {
+                val msg = runCatching {
+                    com.ercan.heybe.tools.video.YtDlp.ensureReady(ctx)
+                    val r = com.ercan.heybe.tools.video.YtDlp.updateNow(ctx)
+                    r + (com.ercan.heybe.tools.video.YtDlp.version(ctx)?.let { " (sürüm $it)" } ?: "")
+                }.getOrElse { "Güncellenemedi: ${it.message}" }
+                Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show()
+            }
+        }) { Text("yt-dlp'yi şimdi güncelle") }
+        HorizontalDivider(Modifier.padding(vertical = 16.dp))
+        Text("Paylaş menüsü ve uygulama güncellemeleri sonraki adımlarda buraya eklenecek.",
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         HorizontalDivider(Modifier.padding(vertical = 16.dp))
         Text("Heybe $version", style = MaterialTheme.typography.bodySmall)

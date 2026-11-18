@@ -10,7 +10,8 @@ android {
     defaultConfig {
         applicationId = "com.ercan.heybe"
         minSdk = 26; targetSdk = 34
-        versionCode = 2; versionName = "0.2"
+        versionCode = 3; versionName = "0.3"
+        ndk { abiFilters += listOf("arm64-v8a") }
     }
     signingConfigs {
         getByName("debug") {
@@ -20,6 +21,7 @@ android {
     }
     buildTypes { release { isMinifyEnabled = false } }
     buildFeatures { compose = true }
+    packaging { jniLibs { useLegacyPackaging = true } }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     lint { abortOnError = false; checkReleaseBuilds = false }
 }
@@ -36,5 +38,8 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
+    implementation("io.github.junkfood02.youtubedl-android:library:0.18.1")
+    implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
     testImplementation("junit:junit:4.13.2")
 }
