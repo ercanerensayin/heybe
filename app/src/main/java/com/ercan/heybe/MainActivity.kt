@@ -3,6 +3,7 @@ package com.ercan.heybe
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,17 +23,34 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ercan.heybe.ui.HeybeRoot
+import com.ercan.heybe.ui.OpenRequest
 import com.ercan.heybe.ui.theme.HeybeTheme
 
 class MainActivity : ComponentActivity() {
+    companion object { const val EXTRA_TOOL = "heybe_tool" }
+
+    private var openRequest by mutableStateOf<OpenRequest?>(null)
+
+    private fun readIntent(intent: Intent?) {
+        intent?.getStringExtra(EXTRA_TOOL)?.let { openRequest = OpenRequest(it, System.nanoTime()) }
+        intent?.removeExtra(EXTRA_TOOL)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        readIntent(intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        if (savedInstanceState == null) readIntent(intent)
         val crashFile = (application as HeybeApp).crashFile()
         val lastCrash = if (crashFile.exists()) crashFile.readText().also { crashFile.delete() } else null
         setContent {
             HeybeTheme {
-                HeybeRoot()
+                HeybeRoot(openRequest) { openRequest = null }
                 var crash by remember { mutableStateOf(lastCrash) }
                 crash?.let { text ->
                     AlertDialog(

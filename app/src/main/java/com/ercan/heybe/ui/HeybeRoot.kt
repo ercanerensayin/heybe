@@ -69,9 +69,18 @@ private val tabs = listOf(
     Tab("settings", "Ayarlar", Icons.Filled.Settings),
 )
 
+/** Paylaş menüsünden gelen "şu aracı aç" isteği. */
+data class OpenRequest(val toolId: String, val nonce: Long)
+
 @Composable
-fun HeybeRoot() {
+fun HeybeRoot(openRequest: OpenRequest? = null, onOpenHandled: () -> Unit = {}) {
     val nav = rememberNavController()
+    androidx.compose.runtime.LaunchedEffect(openRequest) {
+        openRequest?.let {
+            nav.navigate("tool/${it.toolId}") { popUpTo("home"); launchSingleTop = false }
+            onOpenHandled()
+        }
+    }
     val entry by nav.currentBackStackEntryAsState()
     val route = entry?.destination?.route
     Scaffold(
@@ -104,7 +113,9 @@ fun HeybeRoot() {
                 val tool = ToolRegistry.byId(e.arguments?.getString("id") ?: "")
                 ToolScreen(tool, onBack = { nav.popBackStack() }) {
                     when (tool?.id) {
-                        "video_indir" -> com.ercan.heybe.tools.video.VideoScreen(onStarted = {
+                        "video_indir" -> com.ercan.heybe.tools.video.VideoScreen(
+                            initialText = remember { com.ercan.heybe.share.SharedInbox.takeText() },
+                            onStarted = {
                             nav.navigate("downloads") { popUpTo("home"); launchSingleTop = true }
                         })
                         else -> ComingSoon(tool)

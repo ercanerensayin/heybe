@@ -1,7 +1,10 @@
 package com.ercan.heybe.ui
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,9 +13,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -79,7 +88,22 @@ fun SettingsScreen() {
             }
         }) { Text("yt-dlp'yi şimdi güncelle") }
         HorizontalDivider(Modifier.padding(vertical = 16.dp))
-        Text("Paylaş menüsü ve uygulama güncellemeleri sonraki adımlarda buraya eklenecek.",
+        Text("Paylaş menüsü", style = MaterialTheme.typography.titleMedium)
+        Text("Paylaş listesinde \"Heybe\" dosyayı uygun araca yönlendirir. Ayrıca iki sabit kısayol vardır: \"Heybe: Video İndir\" (linki en yüksek kalitede hemen indirir) ve aşağıda seçtiğin ikinci kısayol.",
+            style = MaterialTheme.typography.bodyMedium)
+        var second by remember { mutableStateOf(com.ercan.heybe.share.Shortcuts.current(ctx)) }
+        com.ercan.heybe.core.ShareRouter.Shortcut.second.forEach { s ->
+            Row(Modifier.fillMaxWidth().clickable {
+                com.ercan.heybe.share.Shortcuts.setSecond(ctx, s); second = s
+            }.padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(selected = second == s, onClick = { com.ercan.heybe.share.Shortcuts.setSecond(ctx, s); second = s })
+                Text("Heybe: " + s.label)
+            }
+        }
+        Text("Değişikliğin paylaş menüsünde görünmesi birkaç saniye sürebilir.", style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
+        HorizontalDivider(Modifier.padding(vertical = 16.dp))
+        Text("Uygulama güncellemeleri sonraki adımlarda buraya eklenecek.",
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         HorizontalDivider(Modifier.padding(vertical = 16.dp))
         Text("Heybe $version", style = MaterialTheme.typography.bodySmall)
