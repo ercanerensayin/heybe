@@ -121,6 +121,9 @@ fun HeybeRoot(openRequest: OpenRequest? = null, onOpenHandled: () -> Unit = {}) 
                         "pdf_birlestir" -> com.ercan.heybe.tools.pdf.PdfMergeSplitScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() })
                         "pdf_sikistir" -> com.ercan.heybe.tools.pdf.PdfCompressScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() })
                         "gorsel_pdf" -> com.ercan.heybe.tools.pdf.ImagesToPdfScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() })
+                        "gorsel_sikistir" -> com.ercan.heybe.tools.image.ImageCompressScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() })
+                        "qr" -> com.ercan.heybe.tools.qr.QrScreen()
+                        "kredi_kdv" -> com.ercan.heybe.tools.calc.CalcScreen()
                         else -> ComingSoon(tool)
                     }
                 }

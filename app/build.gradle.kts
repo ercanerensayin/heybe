@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId = "com.ercan.heybe"
         minSdk = 26; targetSdk = 34
-        versionCode = 5; versionName = "0.5"
+        versionCode = 6; versionName = "0.6"
         ndk { abiFilters += listOf("arm64-v8a") }
     }
     signingConfigs {
@@ -43,5 +43,8 @@ dependencies {
     implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
     implementation("androidx.exifinterface:exifinterface:1.3.7")
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
+    implementation("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
     testImplementation("junit:junit:4.13.2")
 }

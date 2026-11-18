@@ -81,14 +81,14 @@ fun RunStatus(run: ToolRun) {
         Card(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
             Column(Modifier.padding(12.dp)) {
                 Text(r.summary, style = MaterialTheme.typography.bodyMedium)
-                Text("Kayıt yeri: " + FileStore.locationLabel(FileStore.Folder.PDF), style = MaterialTheme.typography.bodySmall,
+                Text("Kayıt yeri: " + FileStore.locationLabel(r.folder), style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (r.files.size == 1) {
                     val f = r.files.first()
                     Text(f.name, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 6.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 6.dp)) {
-                        OutlinedButton(onClick = { openFile(ctx, f.uri) }) { Text("Aç") }
-                        OutlinedButton(onClick = { shareFile(ctx, f.uri) }) { Text("Paylaş") }
+                        OutlinedButton(onClick = { openFile(ctx, f.uri, r.mime) }) { Text("Aç") }
+                        OutlinedButton(onClick = { shareFile(ctx, f.uri, r.mime) }) { Text("Paylaş") }
                     }
                 } else {
                     Text("Dosyalar İndirilenler sekmesinde de listelendi.", style = MaterialTheme.typography.bodySmall,

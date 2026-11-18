@@ -32,7 +32,12 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 /** Bir işlemin sonucu: kaydedilen dosyalar ve kullanıcıya gösterilecek özet. */
-data class PdfResult(val files: List<FileStore.Saved>, val summary: String)
+data class PdfResult(
+    val files: List<FileStore.Saved>,
+    val summary: String,
+    val folder: FileStore.Folder = FileStore.Folder.PDF,
+    val mime: String = "application/pdf",
+)
 
 class PdfUserError(message: String) : Exception(message)
 
