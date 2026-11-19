@@ -29,6 +29,8 @@ object ShareRouter {
         m.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document", true) ||
         m.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", true) ||
         m.equals("text/csv", true) || m.equals("text/comma-separated-values", true)
+    private fun isBook(m: String) = m.equals("application/epub+zip", true) ||
+        m.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document", true)
     private fun isAv(m: String) = m.startsWith("video/", ignoreCase = true) || m.startsWith("audio/", ignoreCase = true)
 
     fun route(mimes: List<String>, text: String?, shortcut: Shortcut?): Route {
@@ -52,8 +54,9 @@ object ShareRouter {
                 files.isEmpty() && !text.isNullOrBlank() -> Route.OpenTool("cevir", text)
                 files.isEmpty() -> Route.Unsupported("Paylaşılan içerik boş.")
                 allPdf && files.size > 1 -> Route.Choose(listOf("pdf_birlestir", "yazdir"))
-                allPdf -> Route.Choose(listOf("pdf_birlestir", "pdf_sikistir", "yazdir", "donustur"))
+                allPdf -> Route.Choose(listOf("okuyucu", "pdf_birlestir", "pdf_sikistir", "yazdir", "donustur"))
                 allImg -> Route.Choose(listOf("ocr", "gorsel_pdf", "gorsel_sikistir", "yazdir", "donustur"))
+                files.size == 1 && isBook(files[0]) -> Route.Choose(listOf("okuyucu", "donustur"))
                 files.all(::isDoc) -> Route.OpenTool("donustur")
                 files.isNotEmpty() && files.all(::isAv) -> Route.Choose(listOf("medya", "donustur"))
                 else -> Route.Unsupported("Bu dosya türleri birlikte işlenemiyor.")

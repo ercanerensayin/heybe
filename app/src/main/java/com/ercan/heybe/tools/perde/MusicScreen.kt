@@ -94,7 +94,7 @@ object MusicLibrary {
 private fun audioPermission() = if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_AUDIO else Manifest.permission.READ_EXTERNAL_STORAGE
 
 @Composable
-private fun rememberMusicController(): MediaController? {
+internal fun rememberMusicController(): MediaController? {
     val ctx = LocalContext.current
     var controller by remember { mutableStateOf<MediaController?>(null) }
     DisposableEffect(Unit) {

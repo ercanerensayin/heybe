@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <queries>
         <intent>
             <action android:name="android.support.customtabs.action.CustomTabsService" />
@@ -28,6 +30,7 @@
         android:supportsRtl="true"
         android:requestLegacyExternalStorage="true"
         android:extractNativeLibs="true"
+        android:usesCleartextTraffic="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <meta-data android:name="com.google.mlkit.vision.DEPENDENCIES" android:value="barcode,barcode_ui,ocr" />
         <provider
@@ -111,6 +114,7 @@
                 <data android:scheme="file" />
                 <data android:mimeType="application/octet-stream" />
                 <data android:mimeType="application/x-udf" />
+                <data android:mimeType="application/epub+zip" />
                 <data android:mimeType="application/zip" />
             </intent-filter>
             <intent-filter>

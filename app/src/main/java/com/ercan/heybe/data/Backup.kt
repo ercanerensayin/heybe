@@ -12,7 +12,7 @@ import java.util.Locale
 
 /** Ayarlar, favoriler, siteler, geçmiş ve izleme kayıtlarının JSON yedeği. Şifreler yedeğe girmez. */
 object Backup {
-    private val prefNames = listOf("heybe", "siteler", "perde", "opensubtitles")
+    private val prefNames = listOf("heybe", "siteler", "perde", "opensubtitles", "okuyucu", "radyo", "ag")
     private val secret = setOf("pass", "token")
 
     suspend fun export(ctx: Context): FileStore.Saved = withContext(Dispatchers.IO) {
@@ -43,6 +43,9 @@ object Backup {
             JSONObject().put("key", it.key).put("title", it.title).put("position", it.position).put("duration", it.duration)
                 .put("lastPlayed", it.lastPlayed).put("watched", it.watched).put("subUri", it.subUri).put("subOffsetMs", it.subOffsetMs)
                 .put("audioLang", it.audioLang).put("textLang", it.textLang).put("textOff", it.textOff)
+        }))
+        root.put("notlar", JSONArray(com.ercan.heybe.tools.notes.NoteStore.dir(ctx).listFiles { f -> f.name.endsWith(".md") }.orEmpty().map {
+            JSONObject().put("ad", it.name).put("metin", it.readText()).put("zaman", it.lastModified())
         }))
         val name = "heybe_yedek_" + SimpleDateFormat("ddMMyyyy_HHmm", Locale.ROOT).format(Date()) + ".json"
         val saved = FileStore.save(ctx, FileStore.Folder.YEDEK, name, "application/json") { it.write(root.toString(2).toByteArray()) }
@@ -96,6 +99,16 @@ object Backup {
                 p++
             }
         }
-        "Geri yüklendi: ayarlar, $h geçmiş kaydı, $p video kaydı. Favorilerin görünmesi için Heybe'yi kapatıp aç."
+        var n = 0
+        root.optJSONArray("notlar")?.let { a ->
+            val dir = com.ercan.heybe.tools.notes.NoteStore.dir(ctx)
+            for (i in 0 until a.length()) {
+                val o = a.getJSONObject(i)
+                val f = java.io.File(dir, o.getString("ad").substringAfterLast('/'))
+                if (f.exists()) continue
+                f.writeText(o.optString("metin")); f.setLastModified(o.optLong("zaman")); n++
+            }
+        }
+        "Geri yüklendi: ayarlar, $h geçmiş kaydı, $p video kaydı, $n not. Favorilerin görünmesi için Heybe'yi kapatıp aç."
     }
 }

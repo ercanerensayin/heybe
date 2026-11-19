@@ -76,8 +76,9 @@ fun PerdeScreen() {
         androidx.compose.material3.TabRow(selectedTabIndex = tab) {
             androidx.compose.material3.Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text("Videolar") })
             androidx.compose.material3.Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text("Müzik") })
+            androidx.compose.material3.Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text("Radyo") })
         }
-        if (tab == 0) VideoLibrary() else MusicTab()
+        when (tab) { 0 -> VideoLibrary(); 1 -> MusicTab(); else -> RadioTab() }
     }
 }
 

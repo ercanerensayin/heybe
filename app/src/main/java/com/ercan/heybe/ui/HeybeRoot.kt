@@ -128,6 +128,11 @@ fun HeybeRoot(openRequest: OpenRequest? = null, onOpenHandled: () -> Unit = {}) 
                         "siteler" -> com.ercan.heybe.tools.sites.SitesScreen()
                         "perde" -> com.ercan.heybe.tools.perde.PerdeScreen()
                         "cevir" -> com.ercan.heybe.tools.translate.TranslateScreen(remember { com.ercan.heybe.share.SharedInbox.takeText() })
+                        "okuyucu" -> com.ercan.heybe.tools.reader.ReaderScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() }, remember { com.ercan.heybe.share.SharedInbox.takeText() })
+                        "notlar" -> com.ercan.heybe.tools.notes.NotesScreen(remember { com.ercan.heybe.share.SharedInbox.takeText() }, onSpeedRead = { t ->
+                            com.ercan.heybe.share.SharedInbox.put(t, emptyList()); nav.navigate("tool/okuyucu")
+                        })
+                        "ag" -> com.ercan.heybe.tools.network.NetworkScreen()
                         "yazdir" -> com.ercan.heybe.tools.print.PrintScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() })
                         "aktarim" -> com.ercan.heybe.tools.transfer.TransferScreen()
                         "uyap" -> com.ercan.heybe.tools.uyap.UdfScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() }, onConvertStarted = {
