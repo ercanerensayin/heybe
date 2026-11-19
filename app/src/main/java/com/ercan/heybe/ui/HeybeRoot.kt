@@ -128,6 +128,7 @@ fun HeybeRoot(openRequest: OpenRequest? = null, onOpenHandled: () -> Unit = {}) 
                         "siteler" -> com.ercan.heybe.tools.sites.SitesScreen()
                         "perde" -> com.ercan.heybe.tools.perde.PerdeScreen()
                         "cevir" -> com.ercan.heybe.tools.translate.TranslateScreen(remember { com.ercan.heybe.share.SharedInbox.takeText() })
+                        "yazdir" -> com.ercan.heybe.tools.print.PrintScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() })
                         "aktarim" -> com.ercan.heybe.tools.transfer.TransferScreen()
                         "uyap" -> com.ercan.heybe.tools.uyap.UdfScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() }, onConvertStarted = {
                             nav.navigate("downloads") { popUpTo("home"); launchSingleTop = true }

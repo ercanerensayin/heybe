@@ -65,6 +65,7 @@ class ToolRun {
 @Composable
 fun RunStatus(run: ToolRun) {
     val ctx = LocalContext.current
+    val print = com.ercan.heybe.tools.print.rememberPrint()
     if (run.busy) {
         Column(Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
             LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -89,6 +90,7 @@ fun RunStatus(run: ToolRun) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 6.dp)) {
                         OutlinedButton(onClick = { openFile(ctx, f.uri, r.mime) }) { Text("Aç") }
                         OutlinedButton(onClick = { shareFile(ctx, f.uri, r.mime) }) { Text("Paylaş") }
+                        if (com.ercan.heybe.core.PrintFit.canPrint(r.mime)) OutlinedButton(onClick = { print(listOf(f.uri)) }) { Text("Yazdır") }
                     }
                 } else {
                     Text("Dosyalar İndirilenler sekmesinde de listelendi.", style = MaterialTheme.typography.bodySmall,

@@ -23,6 +23,7 @@ object ToolRegistry {
         Tool("donustur", "Dönüştürücü", "PDF → EPUB/Word, Word/EPUB → PDF, HEIC → JPG, MKV → MP4, WAV → MP3, Excel ↔ CSV", Category.BELGE, listOf("dönüştür", "çevir", "epub", "word", "docx", "heic", "jpg", "png", "txt", "e-kitap", "mkv", "mp4", "mp3", "wav", "flac", "excel", "csv", "xlsx")),
         Tool("ocr", "Metin Tanıma (OCR)", "Fotoğraftaki yazıyı metne çevir; IBAN ve telefonları ayıkla", Category.BELGE, listOf("ocr", "metin", "yazı", "tara", "iban", "kopyala", "ekran görüntüsü")),
         Tool("cevir", "Çevirmen", "İnternetsiz çeviri: yazı, pano, fotoğraf (OCR)", Category.BELGE, listOf("çevir", "çeviri", "tercüme", "ingilizce", "translate", "dil", "yds")),
+        Tool("yazdir", "Yazdır", "PDF ve fotoğrafları yazıcıya gönder ya da PDF olarak kaydet", Category.BELGE, listOf("yazdır", "yazıcı", "print", "çıktı", "canon", "nokoprint", "kâğıt", "kağıt")),
         Tool("qr", "QR / Barkod", "QR ve barkod oku ya da oluştur", Category.BELGE, listOf("qr", "barkod", "kare kod", "tara")),
         Tool("video_indir", "Video İndir", "Linkten en yüksek kalitede video ya da MP3 indir", Category.MEDYA, listOf("video", "indir", "youtube", "instagram", "mp3", "müzik")),
         Tool("perde", "Perde", "Video ve müzik oynatıcı: altyazı, ses dili, kaldığın yerden devam, arka planda müzik", Category.MEDYA, listOf("video", "oynatıcı", "film", "dizi", "altyazı", "mkv", "vlc", "izle", "müzik", "şarkı", "mp3", "dinle")),

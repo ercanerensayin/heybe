@@ -77,6 +77,7 @@ fun ScanScreen(openTool: (String) -> Unit, onConvertStarted: () -> Unit) {
     var saved by remember { mutableStateOf<FileStore.Saved?>(null) }
     var busy by remember { mutableStateOf(false) }
     val withStorage = rememberWithPermissions(storagePermissions(), "Kaydetmek için depolama izni gerekli.")
+    val printPages = com.ercan.heybe.tools.print.rememberPrint()
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { res ->
         if (res.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
@@ -141,6 +142,9 @@ fun ScanScreen(openTool: (String) -> Unit, onConvertStarted: () -> Unit) {
                     OutlinedButton(onClick = { openFile(ctx, s.uri) }) { Text("Aç") }
                     OutlinedButton(onClick = { shareFile(ctx, s.uri) }) { Text("Paylaş") }
                 }
+            }
+            OutlinedButton(enabled = !busy, modifier = Modifier.fillMaxWidth().padding(top = 8.dp), onClick = { printPages(pages) }) {
+                Text("Yazdır")
             }
             Text("Devam et", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 16.dp, bottom = 4.dp))
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

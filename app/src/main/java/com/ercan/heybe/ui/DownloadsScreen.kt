@@ -96,6 +96,7 @@ private fun HistoryRow(item: HistoryItem, onPlayVideo: (() -> Unit)? = null) {
     val scope = rememberCoroutineScope()
     var menu by remember { mutableStateOf(false) }
     val tool = ToolRegistry.byId(item.toolId)
+    val print = com.ercan.heybe.tools.print.rememberPrint()
 
     fun open() {
         if (onPlayVideo != null) {
@@ -148,6 +149,9 @@ private fun HistoryRow(item: HistoryItem, onPlayVideo: (() -> Unit)? = null) {
                     menu = false
                     FileStore.shareIntent(item)?.let { runCatching { ctx.startActivity(it) } }
                 })
+                if (com.ercan.heybe.core.PrintFit.canPrint(item.mime)) item.uri?.let { u ->
+                    DropdownMenuItem(text = { Text("Yazdır") }, onClick = { menu = false; print(listOf(android.net.Uri.parse(u))) })
+                }
                 DropdownMenuItem(text = { Text("Dosyayı sil") }, onClick = {
                     menu = false
                     scope.launch {

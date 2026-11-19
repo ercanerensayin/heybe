@@ -42,7 +42,7 @@ object ShareRouter {
             Shortcut.PDF -> when {
                 allImg -> Route.OpenTool("gorsel_pdf")
                 allPdf && files.size > 1 -> Route.OpenTool("pdf_birlestir")
-                allPdf -> Route.Choose(listOf("pdf_birlestir", "pdf_sikistir", "donustur"))
+                allPdf -> Route.Choose(listOf("pdf_birlestir", "pdf_sikistir", "yazdir", "donustur"))
                 else -> Route.Unsupported("PDF araçları yalnızca PDF ve görsel dosyalarla çalışır.")
             }
             Shortcut.GORSEL_SIKISTIR -> if (allImg) Route.OpenTool("gorsel_sikistir") else Route.Unsupported("Bu kısayol yalnızca görsellerle çalışır.")
@@ -51,9 +51,9 @@ object ShareRouter {
                 files.isEmpty() && url != null -> Route.OpenTool("video_indir", url)
                 files.isEmpty() && !text.isNullOrBlank() -> Route.OpenTool("cevir", text)
                 files.isEmpty() -> Route.Unsupported("Paylaşılan içerik boş.")
-                allPdf && files.size > 1 -> Route.OpenTool("pdf_birlestir")
-                allPdf -> Route.Choose(listOf("pdf_birlestir", "pdf_sikistir", "donustur"))
-                allImg -> Route.Choose(listOf("ocr", "gorsel_pdf", "gorsel_sikistir", "donustur"))
+                allPdf && files.size > 1 -> Route.Choose(listOf("pdf_birlestir", "yazdir"))
+                allPdf -> Route.Choose(listOf("pdf_birlestir", "pdf_sikistir", "yazdir", "donustur"))
+                allImg -> Route.Choose(listOf("ocr", "gorsel_pdf", "gorsel_sikistir", "yazdir", "donustur"))
                 files.all(::isDoc) -> Route.OpenTool("donustur")
                 files.isNotEmpty() && files.all(::isAv) -> Route.Choose(listOf("medya", "donustur"))
                 else -> Route.Unsupported("Bu dosya türleri birlikte işlenemiyor.")
