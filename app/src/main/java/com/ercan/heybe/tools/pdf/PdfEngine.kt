@@ -204,12 +204,15 @@ object PdfEngine {
     fun decodeImage(ctx: Context, uri: Uri, maxSide: Int): Bitmap? {
         val cr = ctx.contentResolver
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        cr.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) } ?: return null
-        if (bounds.outWidth <= 0) return null
+        // inJustDecodeBounds açıkken decodeStream her zaman null döner; yalnızca boyutları okuruz.
+        val opened = cr.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds); true } ?: false
+        if (!opened) return null
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return decodeWithImageDecoder(ctx, uri, maxSide)
         var sample = 1
         while (max(bounds.outWidth, bounds.outHeight) / (sample * 2) >= maxSide) sample *= 2
         val opts = BitmapFactory.Options().apply { inSampleSize = sample }
-        var bmp = cr.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, opts) } ?: return null
+        var bmp = cr.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, opts) }
+            ?: return decodeWithImageDecoder(ctx, uri, maxSide)
         val rotation = runCatching {
             cr.openInputStream(uri)?.use { ExifInterface(it).rotationDegrees } ?: 0
         }.getOrDefault(0)
@@ -222,6 +225,22 @@ object PdfEngine {
         val scaled = scaleDown(bmp, maxSide)
         if (scaled !== bmp) bmp.recycle()
         return scaled
+    }
+
+    /** BitmapFactory'nin açamadığı biçimler (bazı HEIC/HEIF fotoğraflar) için Android 9+ yedeği. */
+    private fun decodeWithImageDecoder(ctx: Context, uri: Uri, maxSide: Int): Bitmap? {
+        if (android.os.Build.VERSION.SDK_INT < 28) return null
+        return runCatching {
+            val src = android.graphics.ImageDecoder.createSource(ctx.contentResolver, uri)
+            android.graphics.ImageDecoder.decodeBitmap(src) { decoder, info, _ ->
+                decoder.allocator = android.graphics.ImageDecoder.ALLOCATOR_SOFTWARE
+                val side = max(info.size.width, info.size.height)
+                if (side > maxSide) {
+                    val f = maxSide.toFloat() / side
+                    decoder.setTargetSize((info.size.width * f).roundToInt().coerceAtLeast(1), (info.size.height * f).roundToInt().coerceAtLeast(1))
+                }
+            }
+        }.getOrNull()
     }
 
     fun mb(bytes: Long): String = if (bytes >= 1024 * 1024) String.format(Locale("tr"), "%.1f MB", bytes / 1048576.0)
