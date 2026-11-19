@@ -66,7 +66,9 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.CaptionStyleCompat
 import androidx.media3.ui.PlayerView
 import com.ercan.heybe.core.PlaybackRules
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private val Scrim = Color(0x99000000)
 
@@ -181,6 +183,7 @@ fun PlayerScreen(player: ExoPlayer, s: PlayerState, a: PlayerActions) {
             Sheet.SPEED -> ChoiceDialog("Oynatma hızı", listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f).map { "${it}x".replace(".0x", "x") to it },
                 s.speed, onPick = a::setSpeed, onClose = { s.sheet = Sheet.NONE })
             Sheet.ASPECT -> ChoiceDialog("Görüntü oranı", Aspect.entries.map { it.label to it }, s.aspect, onPick = a::setAspect, onClose = { s.sheet = Sheet.NONE })
+            Sheet.ONLINE -> OnlineSubsDialog(s, a)
             Sheet.NONE -> {}
         }
     }
@@ -327,6 +330,7 @@ private fun TracksDialog(s: PlayerState, a: PlayerActions) {
                     }
                 }
                 TextButton(onClick = a::pickSubtitleFile) { Text(if (s.externalSub == null) "Altyazı dosyası seç…" else "Başka altyazı dosyası seç…") }
+                TextButton(onClick = { s.sheet = Sheet.ONLINE }) { Text("İnternetten ara (OpenSubtitles)…") }
                 s.externalSub?.let { name ->
                     Text("Harici: $name", style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text("Zaman kaydırma: " + (if (s.subOffset >= 0) "+" else "") + "%.1f sn".format(s.subOffset / 1000.0),
@@ -353,3 +357,54 @@ private fun TracksDialog(s: PlayerState, a: PlayerActions) {
         confirmButton = { TextButton(onClick = { s.sheet = Sheet.NONE }) { Text("Kapat") } },
     )
 }
+
+
+@Composable
+private fun OnlineSubsDialog(s: PlayerState, a: PlayerActions) {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var query by remember { mutableStateOf(com.ercan.heybe.core.SubQuery.clean(s.title)) }
+    var lang by remember { mutableStateOf("tr") }
+    var hits by remember { mutableStateOf<List<OpenSubs.Hit>?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    var msg by remember { mutableStateOf<String?>(null) }
+    fun search() { scope.launch_ { busy = true; msg = null
+        runCatching { OpenSubs.search(ctx, query, lang) }.onSuccess { hits = it; if (it.isEmpty()) msg = "Sonuç bulunamadı; adı kısaltıp yeniden dene." }
+            .onFailure { msg = it.message }
+        busy = false } }
+    LaunchedEffect(Unit) { if (OpenSubs.apiKey(ctx).isNotEmpty()) search() else msg = "Önce Heybe → Ayarlar → Altyazı (OpenSubtitles) bölümüne ücretsiz API anahtarını gir." }
+    AlertDialog(
+        onDismissRequest = { s.sheet = Sheet.TRACKS },
+        title = { Text("İnternetten altyazı") },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                androidx.compose.material3.OutlinedTextField(query, { query = it }, label = { Text("Film / dizi adı") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    FilterChip(selected = lang == "tr", onClick = { lang = "tr" }, label = { Text("Türkçe") })
+                    FilterChip(selected = lang == "en", onClick = { lang = "en" }, label = { Text("İngilizce") })
+                    Spacer(Modifier.weight(1f))
+                    TextButton(onClick = { search() }, enabled = !busy && query.isNotBlank()) { Text("Ara") }
+                }
+                if (busy) CircularProgressIndicator(Modifier.padding(8.dp).size(24.dp))
+                msg?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
+                hits?.take(30)?.forEach { h ->
+                    Column(Modifier.fillMaxWidth().clickable(enabled = !busy) {
+                        scope.launch_ { busy = true; msg = null
+                            runCatching { OpenSubs.download(ctx, h) }.onSuccess { (f, left) ->
+                                if (left != null) android.widget.Toast.makeText(ctx, "Altyazı yüklendi. Bugün kalan indirme: $left", android.widget.Toast.LENGTH_SHORT).show()
+                                a.loadSubtitle(android.net.Uri.fromFile(f))
+                            }.onFailure { msg = it.message }
+                            busy = false }
+                    }.padding(vertical = 6.dp)) {
+                        Text(h.release, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text("${h.language.uppercase()} · ${h.downloads} indirme", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    HorizontalDivider()
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = { s.sheet = Sheet.TRACKS }) { Text("Geri") } },
+    )
+}
+
+private fun CoroutineScope.launch_(block: suspend CoroutineScope.() -> Unit) { launch(block = block) }

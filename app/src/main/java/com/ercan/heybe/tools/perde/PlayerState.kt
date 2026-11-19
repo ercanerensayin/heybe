@@ -19,7 +19,7 @@ enum class Aspect(val label: String, val mode: Int) {
 
 enum class SubSize(val label: String, val fraction: Float) { KUCUK("Küçük", 0.045f), ORTA("Orta", 0.058f), BUYUK("Büyük", 0.075f) }
 
-enum class Sheet { NONE, TRACKS, SPEED, ASPECT }
+enum class Sheet { NONE, TRACKS, SPEED, ASPECT, ONLINE }
 
 /** Oynatma ekranının Compose tarafından okunan durumu. */
 class PlayerState {

@@ -6,6 +6,7 @@ import java.io.File
 class HeybeApp : Application() {
     override fun onCreate() {
         super.onCreate()
+        com.ercan.heybe.data.FileStore.loadLabel(this)
         com.ercan.heybe.tools.video.DownloadWorker.createChannel(this)
         runCatching { com.ercan.heybe.tools.pdf.PdfEngine.init(this) }
         runCatching { com.ercan.heybe.update.DailyWorker.schedule(this) }

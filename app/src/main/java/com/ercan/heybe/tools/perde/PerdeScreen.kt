@@ -71,6 +71,18 @@ private fun videoPermission() = if (Build.VERSION.SDK_INT >= 33) Manifest.permis
 
 @Composable
 fun PerdeScreen() {
+    var tab by rememberSaveable { mutableStateOf(0) }
+    Column(Modifier.fillMaxSize()) {
+        androidx.compose.material3.TabRow(selectedTabIndex = tab) {
+            androidx.compose.material3.Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text("Videolar") })
+            androidx.compose.material3.Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text("Müzik") })
+        }
+        if (tab == 0) VideoLibrary() else MusicTab()
+    }
+}
+
+@Composable
+private fun VideoLibrary() {
     val ctx = LocalContext.current
     val dao = remember { HeybeDb.get(ctx).playback() }
     var granted by remember { mutableStateOf(ContextCompat.checkSelfPermission(ctx, videoPermission()) == PackageManager.PERMISSION_GRANTED) }

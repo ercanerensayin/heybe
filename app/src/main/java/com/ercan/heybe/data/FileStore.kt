@@ -17,19 +17,47 @@ import java.io.OutputStream
 object FileStore {
     const val ROOT = "Heybe"
 
-    enum class Folder(val dir: String) { VIDEO("Video"), PDF("PDF"), GORSEL("Görsel"), METIN("Metin"), SES("Ses"), BELGE("Belgeler"), DENEME("Deneme") }
+    enum class Folder(val dir: String) { VIDEO("Video"), PDF("PDF"), GORSEL("Görsel"), METIN("Metin"), SES("Ses"), BELGE("Belgeler"), YEDEK("Yedek"), DENEME("Deneme") }
 
     data class Saved(val uri: Uri, val path: String?, val name: String, val size: Long)
 
     /** Android 9 ve öncesinde depolama izni gerekir. */
     fun needsPermission(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
 
-    fun locationLabel(folder: Folder? = null): String =
-        "Download/$ROOT" + (folder?.let { "/" + it.dir } ?: "")
+    // ----- Kullanıcının seçtiği kayıt klasörü (SAF ağacı) -----
+    private const val PREF = "kayit"
+    @Volatile var customLabel: String? = null
+        private set
 
-    fun save(ctx: Context, folder: Folder, name: String, mime: String, write: (OutputStream) -> Unit): Saved =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) saveQ(ctx, folder, name, mime, write)
+    private fun sp(ctx: Context) = ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE)
+    fun tree(ctx: Context): Uri? = sp(ctx).getString("agac", null)?.let(Uri::parse)
+    fun loadLabel(ctx: Context) { customLabel = if (tree(ctx) != null) sp(ctx).getString("etiket", null) else null }
+    fun setTree(ctx: Context, uri: Uri?) {
+        if (uri == null) { sp(ctx).edit().remove("agac").remove("etiket").apply(); customLabel = null; return }
+        val label = androidx.documentfile.provider.DocumentFile.fromTreeUri(ctx, uri)?.name ?: "Seçilen klasör"
+        sp(ctx).edit().putString("agac", uri.toString()).putString("etiket", label).apply(); customLabel = label
+    }
+
+    fun locationLabel(folder: Folder? = null): String =
+        (customLabel ?: "Download/$ROOT") + (folder?.let { "/" + it.dir } ?: "")
+
+    fun save(ctx: Context, folder: Folder, name: String, mime: String, write: (OutputStream) -> Unit): Saved {
+        tree(ctx)?.let { return saveTree(ctx, it, folder, name, mime, write) }
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) saveQ(ctx, folder, name, mime, write)
         else saveLegacy(ctx, folder, name, mime, write)
+    }
+
+    private fun saveTree(ctx: Context, tree: Uri, folder: Folder, name: String, mime: String, write: (OutputStream) -> Unit): Saved {
+        val root = androidx.documentfile.provider.DocumentFile.fromTreeUri(ctx, tree)
+        if (root == null || !root.canWrite()) error("Seçilen kayıt klasörüne yazılamıyor; Ayarlar'dan klasörü yeniden seç ya da varsayılana dön.")
+        val dir = root.findFile(folder.dir)?.takeIf { it.isDirectory } ?: root.createDirectory(folder.dir) ?: error("Klasör oluşturulamadı: ${folder.dir}")
+        val unique = FileNamer.unique(name) { dir.findFile(it) != null }
+        val f = dir.createFile(mime, unique) ?: error("Dosya oluşturulamadı: $unique")
+        try { ctx.contentResolver.openOutputStream(f.uri)!!.use(write) } catch (e: Exception) { f.delete(); throw e }
+        return Saved(f.uri, null, f.name ?: unique, f.length())
+    }
+
+    private fun isDocUri(ctx: Context, u: Uri) = android.provider.DocumentsContract.isDocumentUri(ctx, u)
 
     private fun saveQ(ctx: Context, folder: Folder, name: String, mime: String, write: (OutputStream) -> Unit): Saved {
         val cr = ctx.contentResolver
@@ -76,6 +104,7 @@ object FileStore {
     fun exists(ctx: Context, item: HistoryItem): Boolean {
         item.path?.let { return File(it).exists() }
         val uri = item.uri?.let(Uri::parse) ?: return false
+        if (isDocUri(ctx, uri)) return runCatching { androidx.documentfile.provider.DocumentFile.fromSingleUri(ctx, uri)?.exists() == true }.getOrDefault(false)
         return runCatching {
             ctx.contentResolver.query(uri, arrayOf(MediaStore.MediaColumns._ID), null, null, null)?.use { it.count > 0 } ?: false
         }.getOrDefault(false)
@@ -84,6 +113,7 @@ object FileStore {
     fun delete(ctx: Context, item: HistoryItem): Boolean {
         item.path?.let { return File(it).delete() }
         val uri = item.uri?.let(Uri::parse) ?: return false
+        if (isDocUri(ctx, uri)) return runCatching { androidx.documentfile.provider.DocumentFile.fromSingleUri(ctx, uri)?.delete() == true }.getOrDefault(false)
         return runCatching { ctx.contentResolver.delete(uri, null, null) > 0 }.getOrDefault(false)
     }
 

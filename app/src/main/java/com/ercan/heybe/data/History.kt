@@ -47,6 +47,9 @@ interface HistoryDao {
     @Update
     suspend fun update(item: HistoryItem)
 
+    @Query("SELECT * FROM history")
+    suspend fun list(): List<HistoryItem>
+
     @Query("DELETE FROM history WHERE id = :id")
     suspend fun delete(id: Long)
 }
@@ -80,6 +83,9 @@ interface PlaybackDao {
 
     @Query("SELECT * FROM playback")
     fun all(): Flow<List<Playback>>
+
+    @Query("SELECT * FROM playback")
+    suspend fun list(): List<Playback>
 
     @androidx.room.Upsert
     suspend fun upsert(p: Playback)

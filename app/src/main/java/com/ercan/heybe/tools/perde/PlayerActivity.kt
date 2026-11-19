@@ -427,6 +427,7 @@ class PlayerActivity : ComponentActivity() {
             player.trackSelectionParameters = b.build(); saveNow()
         }
         override fun pickSubtitleFile() = pickSubtitle.launch(arrayOf("*/*"))
+        override fun loadSubtitle(uri: Uri) { state.sheet = Sheet.NONE; onSubtitlePicked(uri) }
         override fun shiftSubtitle(deltaMs: Long) = this@PlayerActivity.shiftSubtitle(deltaMs)
         override fun setSubSize(s: SubSize) { state.subSize = s; prefs.edit().putString("altyazi_boyut", s.name).apply() }
         override fun toggleSubBackground() { state.subBackground = !state.subBackground; prefs.edit().putBoolean("altyazi_kutu", state.subBackground).apply() }
@@ -437,5 +438,5 @@ interface PlayerActions {
     fun back(); fun togglePlay(); fun seekBy(ms: Long); fun seekTo(ms: Long); fun restart(); fun next()
     fun cancelCountdown(); fun playNextNow(); fun pip(); fun setSpeed(s: Float); fun setAspect(a: Aspect)
     fun toggleRotationLock(); fun selectAudio(t: TrackOption); fun selectText(t: TrackOption?)
-    fun pickSubtitleFile(); fun shiftSubtitle(deltaMs: Long); fun setSubSize(s: SubSize); fun toggleSubBackground()
+    fun pickSubtitleFile(); fun loadSubtitle(uri: Uri); fun shiftSubtitle(deltaMs: Long); fun setSubSize(s: SubSize); fun toggleSubBackground()
 }
