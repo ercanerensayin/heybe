@@ -11,7 +11,8 @@
     <application
         android:name=".HeybeApp"
         android:label="Heybe"
-        android:icon="@android:drawable/ic_menu_agenda"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:requestLegacyExternalStorage="true"
         android:extractNativeLibs="true"

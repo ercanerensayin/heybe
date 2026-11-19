@@ -60,7 +60,7 @@ class DownloadWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(c
 
     private fun notification(title: String, percent: Int?, text: String) =
         NotificationCompat.Builder(applicationContext, CHANNEL)
-            .setSmallIcon(android.R.drawable.stat_sys_download)
+            .setSmallIcon(com.ercan.heybe.R.drawable.ic_stat_heybe)
             .setContentTitle(title)
             .setContentText(text)
             .setOnlyAlertOnce(true)

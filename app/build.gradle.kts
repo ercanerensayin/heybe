@@ -12,7 +12,7 @@ android {
         minSdk = 26; targetSdk = 34
         // GitHub Actions her derlemede numarayı artırır; böylece her sürüm öncekinin üstüne kurulur.
         val run = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 0
-        versionCode = 100 + run; versionName = "0.7.$run"
+        versionCode = 100 + run; versionName = "1.0.$run"
         ndk { abiFilters += listOf("arm64-v8a") }
     }
     signingConfigs {

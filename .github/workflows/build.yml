@@ -19,5 +19,5 @@ jobs:
         run: |
           cp app/build/outputs/apk/debug/app-debug.apk Heybe.apk
           gh release delete son-surum -y --cleanup-tag || true
-          printf 'Otomatik derlendi: %s\nversionCode=%s\nversionName=0.7.%s\n' "${{ github.sha }}" "$((100 + ${{ github.run_number }}))" "${{ github.run_number }}" > notlar.txt
+          printf 'Otomatik derlendi: %s\nversionCode=%s\nversionName=1.0.%s\n' "${{ github.sha }}" "$((100 + ${{ github.run_number }}))" "${{ github.run_number }}" > notlar.txt
           gh release create son-surum Heybe.apk --title "Heybe (son sürüm)" --notes-file notlar.txt --target ${{ github.sha }}

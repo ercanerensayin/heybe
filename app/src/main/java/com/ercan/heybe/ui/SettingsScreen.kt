@@ -50,27 +50,6 @@ fun SettingsScreen() {
         Text("Dosyalar araç başına alt klasörlere kaydedilir: " +
             FileStore.Folder.entries.filter { it != FileStore.Folder.DENEME }.joinToString(", ") { FileStore.locationLabel(it) } + ".",
             style = MaterialTheme.typography.bodyMedium)
-        Spacer(Modifier.padding(4.dp))
-        Text("Kayıt sistemini sınamak için küçük bir deneme dosyası oluşturup İndirilenler'e ekler.",
-            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        OutlinedButton(onClick = {
-            withStorage {
-                scope.launch {
-                    val result = runCatching {
-                        withContext(Dispatchers.IO) {
-                            val stamp = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale("tr")).format(Date())
-                            val saved = FileStore.save(ctx, FileStore.Folder.DENEME, "heybe_deneme.txt", "text/plain") {
-                                it.write("Heybe kayıt denemesi\n$stamp\n".toByteArray())
-                            }
-                            Recorder.done(ctx, "deneme", saved, "text/plain")
-                            saved
-                        }
-                    }
-                    result.onSuccess { Toast.makeText(ctx, "Kaydedildi: ${FileStore.locationLabel(FileStore.Folder.DENEME)}/${it.name}", Toast.LENGTH_LONG).show() }
-                        .onFailure { Toast.makeText(ctx, "Kaydedilemedi: ${it.message}", Toast.LENGTH_LONG).show() }
-                }
-            }
-        }) { Text("Deneme dosyası kaydet") }
 
         HorizontalDivider(Modifier.padding(vertical = 16.dp))
         Text("Video indirici (yt-dlp)", style = MaterialTheme.typography.titleMedium)

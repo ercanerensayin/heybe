@@ -52,7 +52,7 @@ class DailyWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
             Intent(ctx, MainActivity::class.java).putExtra(MainActivity.EXTRA_UPDATE, true).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val n = NotificationCompat.Builder(ctx, CHANNEL)
-            .setSmallIcon(android.R.drawable.stat_sys_download_done)
+            .setSmallIcon(com.ercan.heybe.R.drawable.ic_stat_heybe)
             .setContentTitle("Heybe güncellemesi var")
             .setContentText("Sürüm $version kurulmaya hazır. Dokun ve kur.")
             .setContentIntent(open).setAutoCancel(true).build()
