@@ -18,6 +18,7 @@ object ToolRegistry {
         Tool("pdf_birlestir", "PDF Birleştir / Böl", "Birden çok PDF'i tek dosya yap ya da sayfalara ayır", Category.BELGE, listOf("pdf", "birleştir", "böl", "sayfa")),
         Tool("pdf_sikistir", "PDF Sıkıştır", "PDF dosyasının boyutunu küçült", Category.BELGE, listOf("pdf", "sıkıştır", "küçült", "boyut")),
         Tool("gorsel_pdf", "Görselden PDF", "Fotoğrafları tek PDF'te topla", Category.BELGE, listOf("pdf", "fotoğraf", "resim", "görsel", "tarama")),
+        Tool("ocr", "Metin Tanıma (OCR)", "Fotoğraftaki yazıyı metne çevir; IBAN ve telefonları ayıkla", Category.BELGE, listOf("ocr", "metin", "yazı", "tara", "iban", "kopyala", "ekran görüntüsü")),
         Tool("qr", "QR / Barkod", "QR ve barkod oku ya da oluştur", Category.BELGE, listOf("qr", "barkod", "kare kod", "tara")),
         Tool("video_indir", "Video İndir", "Linkten en yüksek kalitede video ya da MP3 indir", Category.MEDYA, listOf("video", "indir", "youtube", "instagram", "mp3", "müzik")),
         Tool("perde", "Perde", "Telefondaki videoları oynat: altyazı, ses dili, kaldığın yerden devam", Category.MEDYA, listOf("video", "oynatıcı", "film", "dizi", "altyazı", "mkv", "vlc", "izle")),

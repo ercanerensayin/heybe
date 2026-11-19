@@ -126,6 +126,7 @@ fun HeybeRoot(openRequest: OpenRequest? = null, onOpenHandled: () -> Unit = {}) 
                         "kredi_kdv" -> com.ercan.heybe.tools.calc.CalcScreen()
                         "siteler" -> com.ercan.heybe.tools.sites.SitesScreen()
                         "perde" -> com.ercan.heybe.tools.perde.PerdeScreen()
+                        "ocr" -> com.ercan.heybe.tools.ocr.OcrScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() })
                         else -> ComingSoon(tool)
                     }
                 }

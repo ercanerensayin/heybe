@@ -13,7 +13,7 @@ class ShareRouterTest {
     @Test fun linksizMetin() { assertTrue(ShareRouter.route(listOf("text/plain"), "merhaba", null) is Route.Unsupported) }
     @Test fun tekPdfSecim() { assertEquals(Route.Choose(listOf("pdf_birlestir", "pdf_sikistir")), ShareRouter.route(listOf("application/pdf"), null, null)) }
     @Test fun cokPdfBirlestir() { assertEquals(Route.OpenTool("pdf_birlestir"), ShareRouter.route(listOf("application/pdf", "application/pdf"), null, null)) }
-    @Test fun gorseller() { assertEquals(Route.Choose(listOf("gorsel_pdf", "gorsel_sikistir")), ShareRouter.route(listOf("image/jpeg", "image/png"), null, null)) }
+    @Test fun gorseller() { assertEquals(Route.Choose(listOf("ocr", "gorsel_pdf", "gorsel_sikistir")), ShareRouter.route(listOf("image/jpeg", "image/png"), null, null)) }
     @Test fun karisik() { assertTrue(ShareRouter.route(listOf("image/jpeg", "application/pdf"), null, null) is Route.Unsupported) }
     @Test fun pdfKisayoluGorsel() { assertEquals(Route.OpenTool("gorsel_pdf"), ShareRouter.route(listOf("image/jpeg"), null, Shortcut.PDF)) }
     @Test fun aliasAdi() { assertEquals(Shortcut.PDF, Shortcut.fromClassName("com.ercan.heybe.share.PdfShortcut")) }

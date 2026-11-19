@@ -47,7 +47,7 @@ object ShareRouter {
                 files.isEmpty() -> Route.Unsupported("Paylaşılan metinde link yok.")
                 allPdf && files.size > 1 -> Route.OpenTool("pdf_birlestir")
                 allPdf -> Route.Choose(listOf("pdf_birlestir", "pdf_sikistir"))
-                allImg -> Route.Choose(listOf("gorsel_pdf", "gorsel_sikistir"))
+                allImg -> Route.Choose(listOf("ocr", "gorsel_pdf", "gorsel_sikistir"))
                 else -> Route.Unsupported("Bu dosya türleri birlikte işlenemiyor.")
             }
         }
