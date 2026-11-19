@@ -19,7 +19,7 @@ object ToolRegistry {
         Tool("pdf_sikistir", "PDF Sıkıştır", "PDF dosyasının boyutunu küçült", Category.BELGE, listOf("pdf", "sıkıştır", "küçült", "boyut")),
         Tool("gorsel_pdf", "Görselden PDF", "Fotoğrafları tek PDF'te topla", Category.BELGE, listOf("pdf", "fotoğraf", "resim", "görsel", "tarama")),
         Tool("tarayici", "Belge Tarayıcı", "Kâğıdı kenarlarını bulup düzelterek tara; PDF, metin ya da Word yap", Category.BELGE, listOf("tara", "tarayıcı", "scanner", "camscanner", "belge", "kağıt", "kâğıt", "fotokopi")),
-        Tool("donustur", "Dönüştürücü", "PDF → EPUB/Word/TXT/JPG, Word ve EPUB → PDF, HEIC → JPG", Category.BELGE, listOf("dönüştür", "çevir", "epub", "word", "docx", "heic", "jpg", "png", "txt", "e-kitap")),
+        Tool("donustur", "Dönüştürücü", "PDF → EPUB/Word, Word/EPUB → PDF, HEIC → JPG, MKV → MP4, WAV → MP3, Excel ↔ CSV", Category.BELGE, listOf("dönüştür", "çevir", "epub", "word", "docx", "heic", "jpg", "png", "txt", "e-kitap", "mkv", "mp4", "mp3", "wav", "flac", "excel", "csv", "xlsx")),
         Tool("ocr", "Metin Tanıma (OCR)", "Fotoğraftaki yazıyı metne çevir; IBAN ve telefonları ayıkla", Category.BELGE, listOf("ocr", "metin", "yazı", "tara", "iban", "kopyala", "ekran görüntüsü")),
         Tool("qr", "QR / Barkod", "QR ve barkod oku ya da oluştur", Category.BELGE, listOf("qr", "barkod", "kare kod", "tara")),
         Tool("video_indir", "Video İndir", "Linkten en yüksek kalitede video ya da MP3 indir", Category.MEDYA, listOf("video", "indir", "youtube", "instagram", "mp3", "müzik")),
@@ -27,6 +27,7 @@ object ToolRegistry {
         Tool("medya", "Medya Araçları", "Videodan MP3 çıkar, video/ses kırp, videoyu küçült", Category.MEDYA, listOf("mp3", "ses", "kırp", "kes", "sıkıştır", "küçült", "whatsapp", "müzik")),
         Tool("gorsel_sikistir", "Görsel Sıkıştır", "Fotoğrafları küçült ve yeniden boyutlandır", Category.MEDYA, listOf("görsel", "fotoğraf", "resim", "sıkıştır", "boyut", "jpg")),
         Tool("siteler", "Siteler", "Önemli sitelerini kaydet, tek dokunuşla Chrome'da aç", Category.WEB, listOf("site", "web", "tarayıcı", "chrome", "e-devlet", "link", "adres")),
+        Tool("birim", "Birim ve Döviz Çevirici", "Uzunluk, ağırlık, sıcaklık, alan… ve TCMB kurlarıyla döviz", Category.HESAP, listOf("birim", "döviz", "kur", "dolar", "euro", "çevir", "metre", "kilo", "sıcaklık", "dönüm")),
         Tool("kredi_kdv", "Kredi / KDV", "Kredi taksiti ve KDV hesapla", Category.HESAP, listOf("kredi", "kdv", "faiz", "taksit", "vergi", "hesap")),
     )
 

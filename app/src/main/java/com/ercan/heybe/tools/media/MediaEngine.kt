@@ -62,7 +62,7 @@ object MediaEngine {
 
     // ---------- FFmpeg (video indiricinin getirdiği) ----------
 
-    private suspend fun ffmpeg(ctx: Context, args: List<String>, durationMs: Long, report: (String) -> Unit) = withContext(Dispatchers.IO) {
+    suspend fun ffmpeg(ctx: Context, args: List<String>, durationMs: Long, report: (String) -> Unit) = withContext(Dispatchers.IO) {
         YtDlp.ensureReady(ctx)
         val bin = File(ctx.applicationInfo.nativeLibraryDir, "libffmpeg.so")
         val pk = File(ctx.noBackupFilesDir, "youtubedl-android/packages")

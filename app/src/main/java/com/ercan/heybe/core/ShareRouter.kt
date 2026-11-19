@@ -26,12 +26,14 @@ object ShareRouter {
     private fun isPdf(m: String) = m.equals("application/pdf", ignoreCase = true)
     private fun isImage(m: String) = m.startsWith("image/", ignoreCase = true)
     private fun isDoc(m: String) = m.equals("application/epub+zip", true) ||
-        m.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document", true)
+        m.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document", true) ||
+        m.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", true) ||
+        m.equals("text/csv", true) || m.equals("text/comma-separated-values", true)
     private fun isAv(m: String) = m.startsWith("video/", ignoreCase = true) || m.startsWith("audio/", ignoreCase = true)
 
     fun route(mimes: List<String>, text: String?, shortcut: Shortcut?): Route {
         val url = text?.let { Regex("https?://[^\\s<>\"']+").find(it)?.value?.trimEnd('.', ',', ')', ']') }
-        val files = mimes.filter { it.isNotBlank() && !it.startsWith("text/") }
+        val files = mimes.filter { it.isNotBlank() && !it.equals("text/plain", ignoreCase = true) && !it.equals("text/html", ignoreCase = true) }
         val allPdf = files.isNotEmpty() && files.all(::isPdf)
         val allImg = files.isNotEmpty() && files.all(::isImage)
 
@@ -52,7 +54,7 @@ object ShareRouter {
                 allPdf -> Route.Choose(listOf("pdf_birlestir", "pdf_sikistir", "donustur"))
                 allImg -> Route.Choose(listOf("ocr", "gorsel_pdf", "gorsel_sikistir", "donustur"))
                 files.all(::isDoc) -> Route.OpenTool("donustur")
-                files.size == 1 && isAv(files[0]) -> Route.OpenTool("medya")
+                files.isNotEmpty() && files.all(::isAv) -> Route.Choose(listOf("medya", "donustur"))
                 else -> Route.Unsupported("Bu dosya türleri birlikte işlenemiyor.")
             }
         }

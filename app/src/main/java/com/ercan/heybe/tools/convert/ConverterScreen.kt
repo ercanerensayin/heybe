@@ -78,12 +78,12 @@ fun ConverterScreen(initial: List<Uri>, onStarted: () -> Unit) {
         Text("Dosyaları seç; uygun hedefler aşağıda çıkar. Dönüştürme telefonda yapılır, dosyaların dışarı gönderilmez.",
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         OutlinedButton(onClick = {
-            pick.launch(arrayOf("application/pdf", "application/epub+zip", Target.DOCX.mime, "image/*"))
+            pick.launch(arrayOf("application/pdf", "application/epub+zip", Target.DOCX.mime, "image/*", "video/*", "audio/*", Target.XLSX.mime, "text/csv", "text/comma-separated-values", "text/*"))
         }, modifier = Modifier.padding(top = 8.dp)) { Text(if (files.isEmpty()) "Dosya seç" else "Dosya ekle") }
         FileList(files, { files = it }, reorder = false)
 
         when {
-            files.isEmpty() -> Text("Desteklenenler: PDF, Word (DOCX), EPUB, görseller (HEIC, WEBP, PNG, JPG).\nEski .doc dosyaları desteklenmiyor.",
+            files.isEmpty() -> Text("Desteklenenler: PDF, Word (DOCX), EPUB, görseller (HEIC, WEBP, PNG, JPG), videolar (MKV, AVI…), ses (WAV, FLAC, M4A…), Excel (XLSX), CSV.\nEski .doc ve .xls dosyaları desteklenmiyor.",
                 style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 12.dp))
             unsupported.isNotEmpty() -> Text("Desteklenmeyen dosya: ${unsupported.joinToString()}", color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 12.dp))
             mixed -> Text("Aynı türden dosyalar seç (ör. yalnızca PDF'ler ya da yalnızca görseller).", color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 12.dp))

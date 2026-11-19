@@ -44,7 +44,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-enum class Kind(val label: String) { PDF("PDF"), DOCX("Word"), EPUB("EPUB"), IMAGE("Görsel") }
+enum class Kind(val label: String) { PDF("PDF"), DOCX("Word"), EPUB("EPUB"), IMAGE("Görsel"), VIDEO("Video"), AUDIO("Ses"), XLSX("Excel"), CSV("CSV") }
 
 enum class Target(val label: String, val ext: String, val mime: String, val folder: FileStore.Folder) {
     EPUB("EPUB (e-kitap)", "epub", "application/epub+zip", FileStore.Folder.BELGE),
@@ -54,6 +54,10 @@ enum class Target(val label: String, val ext: String, val mime: String, val fold
     PDF("PDF", "pdf", "application/pdf", FileStore.Folder.PDF),
     JPG("JPG", "jpg", "image/jpeg", FileStore.Folder.GORSEL),
     PNG("PNG", "png", "image/png", FileStore.Folder.GORSEL),
+    MP4("MP4 (yeniden kodlamadan)", "mp4", "video/mp4", FileStore.Folder.VIDEO),
+    MP3("MP3", "mp3", "audio/mpeg", FileStore.Folder.SES),
+    CSV("CSV (her sayfa ayrı)", "csv", "text/csv", FileStore.Folder.BELGE),
+    XLSX("Excel (XLSX)", "xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", FileStore.Folder.BELGE),
 }
 
 object ConvertEngine {
@@ -66,6 +70,10 @@ object ConvertEngine {
             ext == "docx" || mime == Target.DOCX.mime -> Kind.DOCX
             ext == "epub" || mime == "application/epub+zip" -> Kind.EPUB
             ext in imageExt || mime?.startsWith("image/") == true -> Kind.IMAGE
+            ext == "xlsx" || mime == Target.XLSX.mime -> Kind.XLSX
+            ext == "csv" || mime == "text/csv" || mime == "text/comma-separated-values" -> Kind.CSV
+            ext in setOf("mkv", "mp4", "avi", "mov", "webm", "m4v", "3gp", "ts", "flv", "wmv") || mime?.startsWith("video/") == true -> Kind.VIDEO
+            ext in setOf("mp3", "wav", "flac", "m4a", "aac", "ogg", "opus", "wma", "amr") || mime?.startsWith("audio/") == true -> Kind.AUDIO
             else -> null
         }
     }
@@ -74,6 +82,10 @@ object ConvertEngine {
         Kind.PDF -> listOf(Target.EPUB, Target.DOCX, Target.TXT, Target.JPG_PAGES)
         Kind.DOCX -> listOf(Target.PDF, Target.EPUB, Target.TXT)
         Kind.EPUB -> listOf(Target.PDF, Target.DOCX, Target.TXT)
+        Kind.VIDEO -> listOf(Target.MP4, Target.MP3)
+        Kind.AUDIO -> listOf(Target.MP3)
+        Kind.XLSX -> listOf(Target.CSV)
+        Kind.CSV -> listOf(Target.XLSX)
         Kind.IMAGE -> if (name.substringAfterLast('.', "").lowercase() in setOf("jpg", "jpeg")) listOf(Target.PNG) else listOf(Target.JPG, Target.PNG)
     }
 
@@ -84,6 +96,22 @@ object ConvertEngine {
         fun save(fileName: String, write: (java.io.OutputStream) -> Unit) = FileStore.save(ctx, target.folder, fileName, target.mime, write)
 
         return when (target) {
+            Target.MP4, Target.MP3 -> listOf(av(ctx, input, base, target, progress))
+            Target.CSV -> {
+                progress(30, "Excel okunuyor")
+                val sheets = com.ercan.heybe.core.Sheets.readXlsx(input).filter { it.rows.isNotEmpty() }
+                if (sheets.isEmpty()) throw PdfUserError("Excel dosyasında veri yok.")
+                sheets.map { sh ->
+                    val n = if (sheets.size == 1) FileNamer.clean(base) else FileNamer.clean(base) + "_" + FileNamer.clean(sh.name)
+                    save("$n.csv") { it.write(com.ercan.heybe.core.Sheets.writeCsv(sh.rows).toByteArray(Charsets.UTF_8)) }
+                }
+            }
+            Target.XLSX -> {
+                progress(30, "CSV okunuyor")
+                val text = com.ercan.heybe.core.SubtitleText.decode(input.readBytes())
+                val rows = com.ercan.heybe.core.Sheets.parseCsv(text)
+                listOf(save(FileNamer.clean(base) + ".xlsx") { com.ercan.heybe.core.Sheets.writeXlsx(base.take(31), rows, it) })
+            }
             Target.JPG_PAGES -> pdfToJpgs(ctx, input, base, progress)
             Target.JPG, Target.PNG -> {
                 progress(30, "Görsel çevriliyor")
@@ -103,7 +131,7 @@ object ConvertEngine {
                     Kind.PDF -> pdfToDoc(ctx, input, base, progress)
                     Kind.DOCX -> { progress(20, "Word okunuyor"); DocReaders.docx(input, base, codec()) }
                     Kind.EPUB -> { progress(20, "EPUB okunuyor"); DocReaders.epub(input, base, codec()) }
-                    Kind.IMAGE -> throw PdfUserError("Görseller yalnızca JPG/PNG'ye çevrilebilir.")
+                    else -> throw PdfUserError("Bu dönüşüm desteklenmiyor.")
                 }
                 if (doc.blocks.none { it is Block.Para || it is Block.Heading })
                     throw PdfUserError("Belgede okunabilir metin bulunamadı.")
@@ -118,6 +146,33 @@ object ConvertEngine {
                 })
             }
         }
+    }
+
+    /** Video/ses: MKV → MP4 kopyalayarak (gerekirse sesi AAC'ye çevirerek), her şey → MP3. */
+    private fun av(ctx: Context, input: File, base: String, target: Target, progress: (Int, String) -> Unit): FileStore.Saved {
+        val dur = runCatching {
+            android.media.MediaMetadataRetriever().run { try { setDataSource(input.absolutePath); extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L } finally { release() } }
+        }.getOrDefault(0L)
+        val out = File(input.parentFile, "cikti_${System.nanoTime()}.${target.ext}")
+        val rep: (String) -> Unit = { s -> s.removePrefix("%").toIntOrNull()?.let { progress(it, "İşleniyor %$it") } }
+        try {
+            kotlinx.coroutines.runBlocking {
+                if (target == Target.MP3) {
+                    com.ercan.heybe.tools.media.MediaEngine.ffmpeg(ctx, listOf("-i", input.absolutePath, "-vn", "-c:a", "libmp3lame", "-q:a", "2", out.absolutePath), dur, rep)
+                } else {
+                    try {
+                        com.ercan.heybe.tools.media.MediaEngine.ffmpeg(ctx, listOf("-i", input.absolutePath, "-map", "0:v:0?", "-map", "0:a?", "-c", "copy", "-sn", "-movflags", "+faststart", out.absolutePath), dur, rep)
+                    } catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) {
+                        out.delete()
+                        com.ercan.heybe.tools.media.MediaEngine.ffmpeg(ctx, listOf("-i", input.absolutePath, "-map", "0:v:0?", "-map", "0:a?", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-sn", "-movflags", "+faststart", out.absolutePath), dur, rep)
+                    }
+                }
+            }
+            if (!out.exists() || out.length() == 0L) throw PdfUserError("Dönüştürülemedi.")
+            return FileStore.save(ctx, target.folder, FileNamer.clean(base) + "." + target.ext, target.mime) { os -> out.inputStream().use { it.copyTo(os) } }
+        } catch (e: PdfUserError) { throw e } catch (e: Exception) {
+            throw PdfUserError(if (target == Target.MP4) "MP4'e çevrilemedi (video kodeki MP4 ile uyumsuz olabilir; Medya Araçları → Sıkıştır ile yeniden kodlayabilirsin)." else "Dönüştürülemedi: ${e.message}")
+        } finally { out.delete() }
     }
 
     fun toText(doc: Doc): String = doc.blocks.mapNotNull {
