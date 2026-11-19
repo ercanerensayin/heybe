@@ -76,7 +76,7 @@ private fun copy(ctx: Context, text: String) {
 }
 
 @Composable
-fun OcrScreen(initial: List<Uri>) {
+fun OcrScreen(initial: List<Uri>, onTranslate: (String) -> Unit = {}) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     var text by rememberSaveable { mutableStateOf("") }
@@ -144,6 +144,9 @@ fun OcrScreen(initial: List<Uri>) {
                 OutlinedButton(onClick = {
                     ctx.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text), "Paylaş"))
                 }) { Text("Paylaş") }
+                OutlinedButton(onClick = { onTranslate(text) }) { Text("Çevir") }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
                 OutlinedButton(onClick = {
                     withStorage {
                         scope.launch {

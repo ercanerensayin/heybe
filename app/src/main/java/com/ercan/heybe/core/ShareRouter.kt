@@ -49,7 +49,8 @@ object ShareRouter {
             Shortcut.GORSEL_PDF -> if (allImg) Route.OpenTool("gorsel_pdf") else Route.Unsupported("Bu kısayol yalnızca görsellerle çalışır.")
             null -> when {
                 files.isEmpty() && url != null -> Route.OpenTool("video_indir", url)
-                files.isEmpty() -> Route.Unsupported("Paylaşılan metinde link yok.")
+                files.isEmpty() && !text.isNullOrBlank() -> Route.OpenTool("cevir", text)
+                files.isEmpty() -> Route.Unsupported("Paylaşılan içerik boş.")
                 allPdf && files.size > 1 -> Route.OpenTool("pdf_birlestir")
                 allPdf -> Route.Choose(listOf("pdf_birlestir", "pdf_sikistir", "donustur"))
                 allImg -> Route.Choose(listOf("ocr", "gorsel_pdf", "gorsel_sikistir", "donustur"))

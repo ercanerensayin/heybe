@@ -127,6 +127,8 @@ fun HeybeRoot(openRequest: OpenRequest? = null, onOpenHandled: () -> Unit = {}) 
                         "kredi_kdv" -> com.ercan.heybe.tools.calc.CalcScreen()
                         "siteler" -> com.ercan.heybe.tools.sites.SitesScreen()
                         "perde" -> com.ercan.heybe.tools.perde.PerdeScreen()
+                        "cevir" -> com.ercan.heybe.tools.translate.TranslateScreen(remember { com.ercan.heybe.share.SharedInbox.takeText() })
+                        "aktarim" -> com.ercan.heybe.tools.transfer.TransferScreen()
                         "uyap" -> com.ercan.heybe.tools.uyap.UdfScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() }, onConvertStarted = {
                             nav.navigate("downloads") { popUpTo("home"); launchSingleTop = true }
                         })
@@ -138,7 +140,9 @@ fun HeybeRoot(openRequest: OpenRequest? = null, onOpenHandled: () -> Unit = {}) 
                             nav.navigate("downloads") { popUpTo("home"); launchSingleTop = true }
                         })
                         "medya" -> com.ercan.heybe.tools.media.MediaScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() })
-                        "ocr" -> com.ercan.heybe.tools.ocr.OcrScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() })
+                        "ocr" -> com.ercan.heybe.tools.ocr.OcrScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() }, onTranslate = { t ->
+                            com.ercan.heybe.share.SharedInbox.put(t, emptyList()); nav.navigate("tool/cevir")
+                        })
                         else -> ComingSoon(tool)
                     }
                 }
