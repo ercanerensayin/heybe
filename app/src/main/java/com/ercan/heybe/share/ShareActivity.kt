@@ -41,6 +41,10 @@ class ShareActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val shortcut = ShareRouter.Shortcut.fromClassName(intent.component?.className)
         val uris = sharedUris()
+        // UYAP belgeleri: paylaşılan ya da "Birlikte aç" ile gelen .udf dosyaları
+        val names = uris.map { com.ercan.heybe.tools.pdf.PdfEngine.displayName(this, it) }
+        if (names.isNotEmpty() && names.all { it.endsWith(".udf", true) }) { open("uyap", null, uris); finish(); return }
+        if (intent.action == Intent.ACTION_VIEW) { toast("Heybe bu dosyayı açamıyor: ${names.firstOrNull() ?: ""}"); finish(); return }
         val mimes = if (uris.isEmpty()) listOf(intent.type ?: "text/plain")
             else uris.map { contentResolver.getType(it) ?: intent.type ?: "" }
         val text = listOfNotNull(intent.getStringExtra(Intent.EXTRA_TEXT), intent.getStringExtra(Intent.EXTRA_SUBJECT))
@@ -90,6 +94,7 @@ class ShareActivity : ComponentActivity() {
     private fun sharedUris(): List<Uri> = when (intent.action) {
         Intent.ACTION_SEND -> listOfNotNull(IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java))
         Intent.ACTION_SEND_MULTIPLE -> IntentCompat.getParcelableArrayListExtra(intent, Intent.EXTRA_STREAM, Uri::class.java).orEmpty()
+        Intent.ACTION_VIEW -> listOfNotNull(intent.data)
         else -> emptyList()
     }
 

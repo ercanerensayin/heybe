@@ -57,6 +57,21 @@ object EpubWriter {
             for (b in ch.blocks) when (b) {
                 is Block.Heading -> body.append("<h${b.level.coerceIn(1, 3)}>").append(Xml.esc(b.text)).append("</h${b.level.coerceIn(1, 3)}>\n")
                 is Block.Para -> if (b.text.isNotBlank()) body.append("<p>").append(Xml.esc(b.text)).append("</p>\n")
+                is Block.Rich -> if (b.text.isNotBlank()) {
+                    val al = when (b.align) { 1 -> " style=\"text-align:center;text-indent:0\""; 2 -> " style=\"text-align:right\""; else -> "" }
+                    body.append("<p").append(al).append(">")
+                    b.runs.forEach { r ->
+                        var t = Xml.esc(r.text)
+                        if (r.underline) t = "<u>$t</u>"; if (r.italic) t = "<i>$t</i>"; if (r.bold) t = "<b>$t</b>"
+                        body.append(t)
+                    }
+                    body.append("</p>\n")
+                }
+                is Block.Table -> {
+                    body.append("<table style=\"border-collapse:collapse;width:100%\">\n")
+                    b.rows.forEach { row -> body.append("<tr>"); row.forEach { c -> body.append("<td style=\"border:1px solid #888;padding:2px 4px\">").append(Xml.esc(c)).append("</td>") }; body.append("</tr>\n") }
+                    body.append("</table>\n")
+                }
                 is Block.Image -> {
                     val name = "images/img${images.size + 1}.jpg"; images += name to b.jpeg
                     body.append("<img src=\"").append(name).append("\" alt=\"\"/>\n")

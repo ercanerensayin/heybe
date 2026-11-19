@@ -35,38 +35,54 @@ object DocReaders {
         val body = parse(xml).documentElement.allByLocal("body").firstOrNull() ?: return@use Doc(title, emptyList())
         val blocks = mutableListOf<Block>()
 
+        fun on(rPr: Element?, name: String): Boolean {
+            val e = rPr?.children()?.firstOrNull { it.localName == name } ?: return false
+            val v = e.getAttributeNS(W, "val"); return v.isEmpty() || v !in setOf("0", "false", "none")
+        }
+
         fun paragraph(p: Element) {
             val style = p.allByLocal("pStyle").firstOrNull()?.getAttributeNS(W, "val").orEmpty()
-            val text = StringBuilder()
-            fun walk(e: Element) {
-                for (c in e.children()) when (c.localName) {
-                    "t" -> text.append(c.textContent)
-                    "tab" -> text.append('\t')
-                    "br", "cr" -> text.append(' ')
-                    "blip" -> {
-                        val id = c.getAttributeNS(R, "embed")
-                        rels[id]?.let { target ->
+            val jc = p.children().firstOrNull { it.localName == "pPr" }?.children()?.firstOrNull { it.localName == "jc" }?.getAttributeNS(W, "val").orEmpty()
+            val align = when (jc) { "center" -> 1; "right", "end" -> 2; "both", "distribute" -> 3; else -> 0 }
+            val runs = mutableListOf<Run>()
+            fun flushText() {
+                val t = runs.joinToString("") { it.text }.replace(Regex("[ \\t]+"), " ").trim()
+                if (t.isEmpty()) { runs.clear(); return }
+                val lvl = Regex("(?i)^(heading|başlık|baslik)\\s*(\\d)").find(style)?.groupValues?.get(2)?.toIntOrNull()
+                    ?: if (style.equals("Title", true)) 1 else 0
+                blocks += when {
+                    lvl > 0 -> Block.Heading(lvl.coerceAtMost(3), t)
+                    runs.any { it.bold || it.italic || it.underline } || align != 0 -> Block.Rich(mergeRuns(runs), align)
+                    else -> Block.Para(t)
+                }
+                runs.clear()
+            }
+            fun walkRun(r: Element) {
+                val rPr = r.children().firstOrNull { it.localName == "rPr" }
+                val b = on(rPr, "b"); val i = on(rPr, "i"); val u = on(rPr, "u")
+                for (c in r.children()) when (c.localName) {
+                    "t" -> runs += Run(c.textContent, b, i, u)
+                    "tab" -> runs += Run("\t", b, i, u)
+                    "br", "cr" -> runs += Run(" ", b, i, u)
+                    "drawing", "pict" -> c.allByLocal("blip").forEach { bl ->
+                        rels[bl.getAttributeNS(R, "embed")]?.let { target ->
                             val path = "word/" + target.removePrefix("/word/").removePrefix("./")
-                            z.getEntry(path)?.let { en -> codec.toJpeg(z.getInputStream(en).readBytes())?.let { if (text.isNotBlank()) { blocks += Block.Para(text.toString().trim()); text.clear() }; blocks += it } }
+                            z.getEntry(path)?.let { en -> codec.toJpeg(z.getInputStream(en).readBytes())?.let { flushText(); blocks += it } }
                         }
                     }
-                    "pPr", "rPr" -> {}
-                    else -> walk(c)
                 }
             }
+            fun walk(e: Element) { for (c in e.children()) when (c.localName) { "r" -> walkRun(c); "pPr" -> {}; else -> walk(c) } }
             walk(p)
-            val t = text.toString().replace(Regex("[ \\t]+"), " ").trim()
-            if (t.isEmpty()) return
-            val lvl = Regex("(?i)^(heading|başlık|baslik)\\s*(\\d)").find(style)?.groupValues?.get(2)?.toIntOrNull()
-                ?: if (style.equals("Title", true)) 1 else 0
-            blocks += if (lvl > 0) Block.Heading(lvl.coerceAtMost(3), t) else Block.Para(t)
+            flushText()
         }
 
         for (e in body.children()) when (e.localName) {
             "p" -> paragraph(e)
-            "tbl" -> e.allByLocal("tr").forEach { tr ->
-                val cells = tr.children().filter { it.localName == "tc" }.map { tc -> tc.allByLocal("t").joinToString("") { it.textContent }.trim() }
-                if (cells.any { it.isNotEmpty() }) blocks += Block.Para(cells.joinToString("  |  "))
+            "tbl" -> {
+                val rows = e.allByLocal("tr").map { tr -> tr.children().filter { it.localName == "tc" }.map { tc -> tc.allByLocal("t").joinToString("") { it.textContent }.trim() } }
+                    .filter { r -> r.any { it.isNotEmpty() } }
+                if (rows.isNotEmpty()) blocks += Block.Table(rows)
             }
             "sdt" -> e.allByLocal("p").forEach(::paragraph)
         }
@@ -137,6 +153,19 @@ object DocReaders {
             walk(bodyEl)
         }
         Doc(title, blocks)
+    }
+
+    /** Aynı biçimdeki ardışık parçaları birleştirir, baştaki/sondaki boşlukları kırpar. */
+    fun mergeRuns(rs: List<Run>): List<Run> {
+        val out = mutableListOf<Run>()
+        for (r in rs) {
+            val t = r.text.replace(Regex(" {2,}"), " ")
+            val last = out.lastOrNull()
+            if (last != null && last.bold == r.bold && last.italic == r.italic && last.underline == r.underline) out[out.lastIndex] = last.copy(text = last.text + t)
+            else out += r.copy(text = t)
+        }
+        if (out.isNotEmpty()) { out[0] = out[0].copy(text = out[0].text.trimStart(' ')); out[out.lastIndex] = out.last().copy(text = out.last().text.trimEnd(' ', '\t')) }
+        return out.filter { it.text.isNotEmpty() }
     }
 
     fun resolve(base: String, href: String): String {

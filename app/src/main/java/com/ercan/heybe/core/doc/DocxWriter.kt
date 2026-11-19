@@ -43,6 +43,30 @@ object DocxWriter {
         for (b in doc.blocks) when (b) {
             is Block.Heading -> body.append("<w:p><w:pPr><w:pStyle w:val=\"Heading${b.level.coerceIn(1, 3)}\"/></w:pPr>").append(run(b.text)).append("</w:p>\n")
             is Block.Para -> body.append("<w:p>").append(run(b.text)).append("</w:p>\n")
+            is Block.Rich -> {
+                body.append("<w:p>")
+                val jc = when (b.align) { 1 -> "center"; 2 -> "right"; 3 -> "both"; else -> null }
+                if (jc != null) body.append("<w:pPr><w:jc w:val=\"$jc\"/></w:pPr>")
+                b.runs.forEach { r ->
+                    val pr = (if (r.bold) "<w:b/>" else "") + (if (r.italic) "<w:i/>" else "") + (if (r.underline) "<w:u w:val=\"single\"/>" else "")
+                    body.append("<w:r>").append(if (pr.isNotEmpty()) "<w:rPr>$pr</w:rPr>" else "")
+                        .append("<w:t xml:space=\"preserve\">").append(Xml.esc(r.text)).append("</w:t></w:r>")
+                }
+                body.append("</w:p>\n")
+            }
+            is Block.Table -> {
+                body.append("<w:tbl><w:tblPr><w:tblW w:w=\"0\" w:type=\"auto\"/><w:tblBorders>")
+                for (side in listOf("top", "left", "bottom", "right", "insideH", "insideV")) body.append("<w:$side w:val=\"single\" w:sz=\"4\" w:space=\"0\" w:color=\"808080\"/>")
+                body.append("</w:tblBorders></w:tblPr>")
+                val cols = b.rows.maxOfOrNull { it.size } ?: 1
+                body.append("<w:tblGrid>"); repeat(cols) { body.append("<w:gridCol w:w=\"${9638 / cols}\"/>") }; body.append("</w:tblGrid>")
+                b.rows.forEach { row ->
+                    body.append("<w:tr>")
+                    (0 until cols).forEach { i -> body.append("<w:tc><w:p>").append(run(row.getOrElse(i) { "" })).append("</w:p></w:tc>") }
+                    body.append("</w:tr>")
+                }
+                body.append("</w:tbl>\n")
+            }
             is Block.Image -> {
                 img++
                 val cx = PAGE_TEXT_WIDTH_EMU.coerceAtMost(b.width * 9525L)

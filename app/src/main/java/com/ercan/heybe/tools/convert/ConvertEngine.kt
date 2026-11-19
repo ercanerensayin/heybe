@@ -16,6 +16,7 @@ import com.ercan.heybe.core.doc.Line
 import com.ercan.heybe.core.doc.Page
 import com.ercan.heybe.core.doc.PageItem
 import com.ercan.heybe.core.doc.Reflow
+import com.ercan.heybe.core.doc.plain
 import com.ercan.heybe.data.FileStore
 import com.ercan.heybe.tools.pdf.PdfEngine
 import com.ercan.heybe.tools.pdf.PdfUserError
@@ -44,7 +45,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-enum class Kind(val label: String) { PDF("PDF"), DOCX("Word"), EPUB("EPUB"), IMAGE("Görsel"), VIDEO("Video"), AUDIO("Ses"), XLSX("Excel"), CSV("CSV") }
+enum class Kind(val label: String) { PDF("PDF"), DOCX("Word"), EPUB("EPUB"), IMAGE("Görsel"), VIDEO("Video"), AUDIO("Ses"), XLSX("Excel"), CSV("CSV"), UDF("UYAP (UDF)") }
 
 enum class Target(val label: String, val ext: String, val mime: String, val folder: FileStore.Folder) {
     EPUB("EPUB (e-kitap)", "epub", "application/epub+zip", FileStore.Folder.BELGE),
@@ -57,6 +58,7 @@ enum class Target(val label: String, val ext: String, val mime: String, val fold
     MP4("MP4 (yeniden kodlamadan)", "mp4", "video/mp4", FileStore.Folder.VIDEO),
     MP3("MP3", "mp3", "audio/mpeg", FileStore.Folder.SES),
     CSV("CSV (her sayfa ayrı)", "csv", "text/csv", FileStore.Folder.BELGE),
+    UDF("UYAP (UDF)", "udf", "application/octet-stream", FileStore.Folder.BELGE),
     XLSX("Excel (XLSX)", "xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", FileStore.Folder.BELGE),
 }
 
@@ -66,6 +68,7 @@ object ConvertEngine {
     fun kindOf(name: String, mime: String?): Kind? {
         val ext = name.substringAfterLast('.', "").lowercase()
         return when {
+            ext == "udf" -> Kind.UDF
             ext == "pdf" || mime == "application/pdf" -> Kind.PDF
             ext == "docx" || mime == Target.DOCX.mime -> Kind.DOCX
             ext == "epub" || mime == "application/epub+zip" -> Kind.EPUB
@@ -79,9 +82,10 @@ object ConvertEngine {
     }
 
     fun targets(kind: Kind, name: String): List<Target> = when (kind) {
-        Kind.PDF -> listOf(Target.EPUB, Target.DOCX, Target.TXT, Target.JPG_PAGES)
-        Kind.DOCX -> listOf(Target.PDF, Target.EPUB, Target.TXT)
+        Kind.PDF -> listOf(Target.EPUB, Target.DOCX, Target.TXT, Target.JPG_PAGES, Target.UDF)
+        Kind.DOCX -> listOf(Target.PDF, Target.UDF, Target.EPUB, Target.TXT)
         Kind.EPUB -> listOf(Target.PDF, Target.DOCX, Target.TXT)
+        Kind.UDF -> listOf(Target.PDF, Target.DOCX, Target.TXT, Target.EPUB)
         Kind.VIDEO -> listOf(Target.MP4, Target.MP3)
         Kind.AUDIO -> listOf(Target.MP3)
         Kind.XLSX -> listOf(Target.CSV)
@@ -131,9 +135,10 @@ object ConvertEngine {
                     Kind.PDF -> pdfToDoc(ctx, input, base, progress)
                     Kind.DOCX -> { progress(20, "Word okunuyor"); DocReaders.docx(input, base, codec()) }
                     Kind.EPUB -> { progress(20, "EPUB okunuyor"); DocReaders.epub(input, base, codec()) }
+                    Kind.UDF -> { progress(20, "UDF okunuyor"); com.ercan.heybe.core.doc.Udf.read(input, base, codec()).first }
                     else -> throw PdfUserError("Bu dönüşüm desteklenmiyor.")
                 }
-                if (doc.blocks.none { it is Block.Para || it is Block.Heading })
+                if (doc.blocks.none { it !is Block.Image })
                     throw PdfUserError("Belgede okunabilir metin bulunamadı.")
                 progress(85, "${target.ext.uppercase()} yazılıyor")
                 val fileName = FileNamer.clean(base) + "." + target.ext
@@ -142,6 +147,7 @@ object ConvertEngine {
                     Target.DOCX -> save(fileName) { DocxWriter.write(doc, it) }
                     Target.TXT -> save(fileName) { it.write(toText(doc).toByteArray(Charsets.UTF_8)) }
                     Target.PDF -> save(fileName) { PdfLayout.write(ctx, doc, it) }
+                    Target.UDF -> save(fileName) { com.ercan.heybe.core.doc.Udf.write(doc, it) }
                     else -> error("hedef")
                 })
             }
@@ -176,7 +182,7 @@ object ConvertEngine {
     }
 
     fun toText(doc: Doc): String = doc.blocks.mapNotNull {
-        when (it) { is Block.Heading -> "\n" + it.text.uppercase(java.util.Locale.forLanguageTag("tr")) + "\n"; is Block.Para -> it.text; else -> null }
+        when (it) { is Block.Heading -> "\n" + it.text.uppercase(java.util.Locale.forLanguageTag("tr")) + "\n"; else -> it.plain() }
     }.joinToString("\n\n").trim() + "\n"
 
     /** Ham görsel baytını JPEG'e çevirir (en uzun kenar 1600 px). */
@@ -364,6 +370,8 @@ object PdfLayout {
             for (b in d.blocks) when (b) {
                 is Block.Heading -> { val s = when (b.level) { 1 -> 18f; 2 -> 14.5f; else -> 12.5f }; ensure(s * 3); text(b.text, s, s * 0.6f, s * 0.3f) }
                 is Block.Para -> text(b.text, 11f, 0f, 6f)
+                is Block.Rich -> text(b.text, 11f, 0f, 6f)
+                is Block.Table -> { b.rows.forEach { r -> text(r.joinToString("  |  "), 10f, 0f, 2f) }; y -= 6f }
                 is Block.Image -> {
                     val img = runCatching { JPEGFactory.createFromStream(pdf, ByteArrayInputStream(b.jpeg)) }.getOrNull() ?: continue
                     val w = min(width, b.width * 0.75f); val h = w * b.height / b.width.coerceAtLeast(1)

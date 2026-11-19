@@ -18,6 +18,7 @@ object ToolRegistry {
         Tool("pdf_birlestir", "PDF Birleştir / Böl", "Birden çok PDF'i tek dosya yap ya da sayfalara ayır", Category.BELGE, listOf("pdf", "birleştir", "böl", "sayfa")),
         Tool("pdf_sikistir", "PDF Sıkıştır", "PDF dosyasının boyutunu küçült", Category.BELGE, listOf("pdf", "sıkıştır", "küçült", "boyut")),
         Tool("gorsel_pdf", "Görselden PDF", "Fotoğrafları tek PDF'te topla", Category.BELGE, listOf("pdf", "fotoğraf", "resim", "görsel", "tarama")),
+        Tool("uyap", "UYAP Belgeleri (UDF)", "UDF dosyalarını aç, PDF/Word'e çevir; Word'den UDF yap", Category.BELGE, listOf("udf", "uyap", "dilekçe", "mahkeme", "avukat", "doküman editörü", "adliye", "icra")),
         Tool("tarayici", "Belge Tarayıcı", "Kâğıdı kenarlarını bulup düzelterek tara; PDF, metin ya da Word yap", Category.BELGE, listOf("tara", "tarayıcı", "scanner", "camscanner", "belge", "kağıt", "kâğıt", "fotokopi")),
         Tool("donustur", "Dönüştürücü", "PDF → EPUB/Word, Word/EPUB → PDF, HEIC → JPG, MKV → MP4, WAV → MP3, Excel ↔ CSV", Category.BELGE, listOf("dönüştür", "çevir", "epub", "word", "docx", "heic", "jpg", "png", "txt", "e-kitap", "mkv", "mp4", "mp3", "wav", "flac", "excel", "csv", "xlsx")),
         Tool("ocr", "Metin Tanıma (OCR)", "Fotoğraftaki yazıyı metne çevir; IBAN ve telefonları ayıkla", Category.BELGE, listOf("ocr", "metin", "yazı", "tara", "iban", "kopyala", "ekran görüntüsü")),

@@ -127,6 +127,9 @@ fun HeybeRoot(openRequest: OpenRequest? = null, onOpenHandled: () -> Unit = {}) 
                         "kredi_kdv" -> com.ercan.heybe.tools.calc.CalcScreen()
                         "siteler" -> com.ercan.heybe.tools.sites.SitesScreen()
                         "perde" -> com.ercan.heybe.tools.perde.PerdeScreen()
+                        "uyap" -> com.ercan.heybe.tools.uyap.UdfScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() }, onConvertStarted = {
+                            nav.navigate("downloads") { popUpTo("home"); launchSingleTop = true }
+                        })
                         "tarayici" -> com.ercan.heybe.tools.scan.ScanScreen(
                             openTool = { id -> nav.navigate("tool/$id") },
                             onConvertStarted = { nav.navigate("downloads") { popUpTo("home"); launchSingleTop = true } },
