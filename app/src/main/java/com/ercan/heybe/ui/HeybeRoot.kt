@@ -125,6 +125,7 @@ fun HeybeRoot(openRequest: OpenRequest? = null, onOpenHandled: () -> Unit = {}) 
                         "qr" -> com.ercan.heybe.tools.qr.QrScreen()
                         "kredi_kdv" -> com.ercan.heybe.tools.calc.CalcScreen()
                         "siteler" -> com.ercan.heybe.tools.sites.SitesScreen()
+                        "perde" -> com.ercan.heybe.tools.perde.PerdeScreen()
                         else -> ComingSoon(tool)
                     }
                 }

@@ -80,19 +80,31 @@ fun DownloadsScreen() {
                     modifier = Modifier.padding(top = 24.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        items(shown, key = { it.id }) { HistoryRow(it) }
+        val videos = shown.filter { it.status == Status.DONE && it.uri != null && it.mime.startsWith("video/") }
+        items(shown, key = { it.id }) { item ->
+            HistoryRow(item, onPlayVideo = if (item in videos) ({
+                com.ercan.heybe.tools.perde.PlayerActivity.start(ctx, videos.map { android.net.Uri.parse(it.uri) }, videos.indexOf(item))
+            }) else null)
+        }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HistoryRow(item: HistoryItem) {
+private fun HistoryRow(item: HistoryItem, onPlayVideo: (() -> Unit)? = null) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     var menu by remember { mutableStateOf(false) }
     val tool = ToolRegistry.byId(item.toolId)
 
     fun open() {
+        if (onPlayVideo != null) {
+            scope.launch {
+                if (withContext(Dispatchers.IO) { FileStore.exists(ctx, item) }) onPlayVideo()
+                else Toast.makeText(ctx, "Dosya bulunamadı (silinmiş ya da taşınmış olabilir).", Toast.LENGTH_LONG).show()
+            }
+            return
+        }
         scope.launch {
             val ok = withContext(Dispatchers.IO) { FileStore.exists(ctx, item) }
             val intent = FileStore.openIntent(item)
