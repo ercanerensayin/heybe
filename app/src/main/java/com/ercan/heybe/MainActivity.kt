@@ -31,11 +31,13 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val EXTRA_TOOL = "heybe_tool"
         const val EXTRA_UPDATE = "heybe_update"
+        const val EXTRA_PASTE = "heybe_paste"
     }
 
     private var openRequest by mutableStateOf<OpenRequest?>(null)
 
     private fun readIntent(intent: Intent?) {
+        if (intent?.getBooleanExtra(EXTRA_PASTE, false) == true) { com.ercan.heybe.quick.QuickFlags.pasteOnOpen = true; intent.removeExtra(EXTRA_PASTE) }
         intent?.getStringExtra(EXTRA_TOOL)?.let { openRequest = OpenRequest(it, System.nanoTime()) }
         intent?.removeExtra(EXTRA_TOOL)
         if (intent?.getBooleanExtra(EXTRA_UPDATE, false) == true) { intent.removeExtra(EXTRA_UPDATE); checkUpdate(force = true) }

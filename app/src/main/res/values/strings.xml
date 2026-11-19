@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kisayol_video">Video İndir</string>
+    <string name="kisayol_tara">Belge Tarayıcı</string>
+    <string name="kisayol_perde">Perde</string>
+    <string name="kisayol_ocr">Metin Tanıma</string>
+</resources>

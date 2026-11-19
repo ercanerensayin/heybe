@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut android:shortcutId="video" android:enabled="true" android:icon="@drawable/kisayol_video" android:shortcutShortLabel="@string/kisayol_video">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.ercan.heybe" android:targetClass="com.ercan.heybe.MainActivity">
+            <extra android:name="heybe_tool" android:value="video_indir" />
+        </intent>
+    </shortcut>
+    <shortcut android:shortcutId="tara" android:enabled="true" android:icon="@drawable/kisayol_tara" android:shortcutShortLabel="@string/kisayol_tara">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.ercan.heybe" android:targetClass="com.ercan.heybe.MainActivity">
+            <extra android:name="heybe_tool" android:value="tarayici" />
+        </intent>
+    </shortcut>
+    <shortcut android:shortcutId="perde" android:enabled="true" android:icon="@drawable/kisayol_perde" android:shortcutShortLabel="@string/kisayol_perde">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.ercan.heybe" android:targetClass="com.ercan.heybe.MainActivity">
+            <extra android:name="heybe_tool" android:value="perde" />
+        </intent>
+    </shortcut>
+    <shortcut android:shortcutId="ocr" android:enabled="true" android:icon="@drawable/kisayol_ocr" android:shortcutShortLabel="@string/kisayol_ocr">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.ercan.heybe" android:targetClass="com.ercan.heybe.MainActivity">
+            <extra android:name="heybe_tool" android:value="ocr" />
+        </intent>
+    </shortcut>
+</shortcuts>

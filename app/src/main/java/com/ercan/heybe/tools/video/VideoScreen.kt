@@ -66,6 +66,18 @@ fun VideoScreen(initialText: String? = null, onStarted: () -> Unit) {
         withPerms(go)
     }
 
+    // Bildirim panelinden açıldıysa panodaki linki kendiliğinden yapıştır.
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        if (com.ercan.heybe.quick.QuickFlags.pasteOnOpen) {
+            com.ercan.heybe.quick.QuickFlags.pasteOnOpen = false
+            kotlinx.coroutines.delay(400) // Android 10+: pano yalnızca pencere odaktayken okunabilir
+            val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = cm.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(ctx)?.toString()
+            if (clip != null && VideoOptions.extractUrl(clip) != null) text = clip
+            else Toast.makeText(ctx, "Panoda link yok; linki kopyalayıp yapıştır.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Column(Modifier.padding(16.dp)) {
         OutlinedTextField(
             value = text, onValueChange = { text = it },

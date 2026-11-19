@@ -69,6 +69,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity>
         <activity
             android:name=".share.ShareActivity"
@@ -163,5 +164,21 @@
                 <data android:mimeType="image/*" />
             </intent-filter>
         </activity-alias>
+        <service
+            android:name=".quick.VideoTile"
+            android:exported="true"
+            android:label="Video İndir"
+            android:icon="@drawable/kutucuk_video"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
+        </service>
+        <service
+            android:name=".quick.ScanTile"
+            android:exported="true"
+            android:label="Heybe Tara"
+            android:icon="@drawable/kutucuk_tara"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
+        </service>
     </application>
 </manifest>
