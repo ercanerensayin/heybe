@@ -25,6 +25,8 @@ object ShareRouter {
 
     private fun isPdf(m: String) = m.equals("application/pdf", ignoreCase = true)
     private fun isImage(m: String) = m.startsWith("image/", ignoreCase = true)
+    private fun isDoc(m: String) = m.equals("application/epub+zip", true) ||
+        m.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document", true)
     private fun isAv(m: String) = m.startsWith("video/", ignoreCase = true) || m.startsWith("audio/", ignoreCase = true)
 
     fun route(mimes: List<String>, text: String?, shortcut: Shortcut?): Route {
@@ -38,7 +40,7 @@ object ShareRouter {
             Shortcut.PDF -> when {
                 allImg -> Route.OpenTool("gorsel_pdf")
                 allPdf && files.size > 1 -> Route.OpenTool("pdf_birlestir")
-                allPdf -> Route.Choose(listOf("pdf_birlestir", "pdf_sikistir"))
+                allPdf -> Route.Choose(listOf("pdf_birlestir", "pdf_sikistir", "donustur"))
                 else -> Route.Unsupported("PDF araçları yalnızca PDF ve görsel dosyalarla çalışır.")
             }
             Shortcut.GORSEL_SIKISTIR -> if (allImg) Route.OpenTool("gorsel_sikistir") else Route.Unsupported("Bu kısayol yalnızca görsellerle çalışır.")
@@ -47,8 +49,9 @@ object ShareRouter {
                 files.isEmpty() && url != null -> Route.OpenTool("video_indir", url)
                 files.isEmpty() -> Route.Unsupported("Paylaşılan metinde link yok.")
                 allPdf && files.size > 1 -> Route.OpenTool("pdf_birlestir")
-                allPdf -> Route.Choose(listOf("pdf_birlestir", "pdf_sikistir"))
-                allImg -> Route.Choose(listOf("ocr", "gorsel_pdf", "gorsel_sikistir"))
+                allPdf -> Route.Choose(listOf("pdf_birlestir", "pdf_sikistir", "donustur"))
+                allImg -> Route.Choose(listOf("ocr", "gorsel_pdf", "gorsel_sikistir", "donustur"))
+                files.all(::isDoc) -> Route.OpenTool("donustur")
                 files.size == 1 && isAv(files[0]) -> Route.OpenTool("medya")
                 else -> Route.Unsupported("Bu dosya türleri birlikte işlenemiyor.")
             }
