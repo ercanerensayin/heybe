@@ -25,6 +25,7 @@ object ShareRouter {
 
     private fun isPdf(m: String) = m.equals("application/pdf", ignoreCase = true)
     private fun isImage(m: String) = m.startsWith("image/", ignoreCase = true)
+    private fun isAv(m: String) = m.startsWith("video/", ignoreCase = true) || m.startsWith("audio/", ignoreCase = true)
 
     fun route(mimes: List<String>, text: String?, shortcut: Shortcut?): Route {
         val url = text?.let { Regex("https?://[^\\s<>\"']+").find(it)?.value?.trimEnd('.', ',', ')', ']') }
@@ -48,6 +49,7 @@ object ShareRouter {
                 allPdf && files.size > 1 -> Route.OpenTool("pdf_birlestir")
                 allPdf -> Route.Choose(listOf("pdf_birlestir", "pdf_sikistir"))
                 allImg -> Route.Choose(listOf("ocr", "gorsel_pdf", "gorsel_sikistir"))
+                files.size == 1 && isAv(files[0]) -> Route.OpenTool("medya")
                 else -> Route.Unsupported("Bu dosya türleri birlikte işlenemiyor.")
             }
         }

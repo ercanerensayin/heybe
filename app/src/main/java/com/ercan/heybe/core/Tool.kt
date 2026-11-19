@@ -22,6 +22,7 @@ object ToolRegistry {
         Tool("qr", "QR / Barkod", "QR ve barkod oku ya da oluştur", Category.BELGE, listOf("qr", "barkod", "kare kod", "tara")),
         Tool("video_indir", "Video İndir", "Linkten en yüksek kalitede video ya da MP3 indir", Category.MEDYA, listOf("video", "indir", "youtube", "instagram", "mp3", "müzik")),
         Tool("perde", "Perde", "Telefondaki videoları oynat: altyazı, ses dili, kaldığın yerden devam", Category.MEDYA, listOf("video", "oynatıcı", "film", "dizi", "altyazı", "mkv", "vlc", "izle")),
+        Tool("medya", "Medya Araçları", "Videodan MP3 çıkar, video/ses kırp, videoyu küçült", Category.MEDYA, listOf("mp3", "ses", "kırp", "kes", "sıkıştır", "küçült", "whatsapp", "müzik")),
         Tool("gorsel_sikistir", "Görsel Sıkıştır", "Fotoğrafları küçült ve yeniden boyutlandır", Category.MEDYA, listOf("görsel", "fotoğraf", "resim", "sıkıştır", "boyut", "jpg")),
         Tool("siteler", "Siteler", "Önemli sitelerini kaydet, tek dokunuşla Chrome'da aç", Category.WEB, listOf("site", "web", "tarayıcı", "chrome", "e-devlet", "link", "adres")),
         Tool("kredi_kdv", "Kredi / KDV", "Kredi taksiti ve KDV hesapla", Category.HESAP, listOf("kredi", "kdv", "faiz", "taksit", "vergi", "hesap")),

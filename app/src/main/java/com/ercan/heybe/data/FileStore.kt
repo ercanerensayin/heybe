@@ -17,7 +17,7 @@ import java.io.OutputStream
 object FileStore {
     const val ROOT = "Heybe"
 
-    enum class Folder(val dir: String) { VIDEO("Video"), PDF("PDF"), GORSEL("Görsel"), METIN("Metin"), DENEME("Deneme") }
+    enum class Folder(val dir: String) { VIDEO("Video"), PDF("PDF"), GORSEL("Görsel"), METIN("Metin"), SES("Ses"), DENEME("Deneme") }
 
     data class Saved(val uri: Uri, val path: String?, val name: String, val size: Long)
 

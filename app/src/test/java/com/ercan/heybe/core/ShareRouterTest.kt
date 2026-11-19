@@ -16,5 +16,6 @@ class ShareRouterTest {
     @Test fun gorseller() { assertEquals(Route.Choose(listOf("ocr", "gorsel_pdf", "gorsel_sikistir")), ShareRouter.route(listOf("image/jpeg", "image/png"), null, null)) }
     @Test fun karisik() { assertTrue(ShareRouter.route(listOf("image/jpeg", "application/pdf"), null, null) is Route.Unsupported) }
     @Test fun pdfKisayoluGorsel() { assertEquals(Route.OpenTool("gorsel_pdf"), ShareRouter.route(listOf("image/jpeg"), null, Shortcut.PDF)) }
+    @Test fun videoMedyaya() { assertEquals(Route.OpenTool("medya"), ShareRouter.route(listOf("video/mp4"), null, null)) }
     @Test fun aliasAdi() { assertEquals(Shortcut.PDF, Shortcut.fromClassName("com.ercan.heybe.share.PdfShortcut")) }
 }
