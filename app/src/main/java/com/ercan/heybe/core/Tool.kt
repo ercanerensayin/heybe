@@ -3,7 +3,7 @@ package com.ercan.heybe.core
 import java.text.Normalizer
 import java.util.Locale
 
-enum class Category(val title: String) { BELGE("Belge"), MEDYA("Medya"), HESAP("Hesap") }
+enum class Category(val title: String) { BELGE("Belge"), MEDYA("Medya"), HESAP("Hesap"), WEB("Web") }
 
 data class Tool(
     val id: String,
@@ -21,6 +21,7 @@ object ToolRegistry {
         Tool("qr", "QR / Barkod", "QR ve barkod oku ya da oluştur", Category.BELGE, listOf("qr", "barkod", "kare kod", "tara")),
         Tool("video_indir", "Video İndir", "Linkten en yüksek kalitede video ya da MP3 indir", Category.MEDYA, listOf("video", "indir", "youtube", "instagram", "mp3", "müzik")),
         Tool("gorsel_sikistir", "Görsel Sıkıştır", "Fotoğrafları küçült ve yeniden boyutlandır", Category.MEDYA, listOf("görsel", "fotoğraf", "resim", "sıkıştır", "boyut", "jpg")),
+        Tool("siteler", "Siteler", "Önemli sitelerini kaydet, tek dokunuşla Chrome'da aç", Category.WEB, listOf("site", "web", "tarayıcı", "chrome", "e-devlet", "link", "adres")),
         Tool("kredi_kdv", "Kredi / KDV", "Kredi taksiti ve KDV hesapla", Category.HESAP, listOf("kredi", "kdv", "faiz", "taksit", "vergi", "hesap")),
     )
 

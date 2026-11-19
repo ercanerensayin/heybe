@@ -124,6 +124,7 @@ fun HeybeRoot(openRequest: OpenRequest? = null, onOpenHandled: () -> Unit = {}) 
                         "gorsel_sikistir" -> com.ercan.heybe.tools.image.ImageCompressScreen(remember { com.ercan.heybe.share.SharedInbox.takeUris() })
                         "qr" -> com.ercan.heybe.tools.qr.QrScreen()
                         "kredi_kdv" -> com.ercan.heybe.tools.calc.CalcScreen()
+                        "siteler" -> com.ercan.heybe.tools.sites.SitesScreen()
                         else -> ComingSoon(tool)
                     }
                 }

@@ -69,7 +69,7 @@ fun DownloadsScreen() {
             Spacer(Modifier.padding(4.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 item { FilterChip(selected = filter == null, onClick = { filter = null }, label = { Text("Tümü") }) }
-                items(Category.entries) { c ->
+                items(Category.entries.filter { it != Category.WEB }) { c ->
                     FilterChip(selected = filter == c.name, onClick = { filter = c.name }, label = { Text(c.title) })
                 }
             }

@@ -16,6 +16,7 @@ fun Category.color(): Color = when (this) {
     Category.BELGE -> Color(0xFF1E88E5)
     Category.MEDYA -> Color(0xFFE53935)
     Category.HESAP -> Color(0xFF43A047)
+    Category.WEB -> Color(0xFF8E24AA)
 }
 
 @Composable
