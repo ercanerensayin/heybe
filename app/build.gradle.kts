@@ -10,7 +10,9 @@ android {
     defaultConfig {
         applicationId = "com.ercan.heybe"
         minSdk = 26; targetSdk = 34
-        versionCode = 7; versionName = "0.6.1"
+        // GitHub Actions her derlemede numarayı artırır; böylece her sürüm öncekinin üstüne kurulur.
+        val run = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 0
+        versionCode = 100 + run; versionName = "0.7.$run"
         ndk { abiFilters += listOf("arm64-v8a") }
     }
     signingConfigs {

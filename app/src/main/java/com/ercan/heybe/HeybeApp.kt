@@ -8,6 +8,7 @@ class HeybeApp : Application() {
         super.onCreate()
         com.ercan.heybe.tools.video.DownloadWorker.createChannel(this)
         runCatching { com.ercan.heybe.tools.pdf.PdfEngine.init(this) }
+        runCatching { com.ercan.heybe.update.DailyWorker.schedule(this) }
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
             runCatching { crashFile().writeText(e.stackTraceToString()) }

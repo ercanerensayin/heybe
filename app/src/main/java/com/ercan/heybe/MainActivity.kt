@@ -25,15 +25,32 @@ import androidx.compose.ui.unit.sp
 import com.ercan.heybe.ui.HeybeRoot
 import com.ercan.heybe.ui.OpenRequest
 import com.ercan.heybe.ui.theme.HeybeTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
-    companion object { const val EXTRA_TOOL = "heybe_tool" }
+    companion object {
+        const val EXTRA_TOOL = "heybe_tool"
+        const val EXTRA_UPDATE = "heybe_update"
+    }
 
     private var openRequest by mutableStateOf<OpenRequest?>(null)
 
     private fun readIntent(intent: Intent?) {
         intent?.getStringExtra(EXTRA_TOOL)?.let { openRequest = OpenRequest(it, System.nanoTime()) }
         intent?.removeExtra(EXTRA_TOOL)
+        if (intent?.getBooleanExtra(EXTRA_UPDATE, false) == true) { intent.removeExtra(EXTRA_UPDATE); checkUpdate(force = true) }
+    }
+
+    /** Açılışta en fazla 12 saatte bir sessizce denetler; yeni sürüm varsa pencere açılır. */
+    private fun checkUpdate(force: Boolean) {
+        val prefs = getSharedPreferences("guncelleme", MODE_PRIVATE)
+        val now = System.currentTimeMillis()
+        if (!force && now - prefs.getLong("son_denetim", 0L) < 12 * 60 * 60 * 1000L) return
+        prefs.edit().putLong("son_denetim", now).apply()
+        kotlinx.coroutines.MainScope().launch {
+            val r = com.ercan.heybe.update.Updater.check(applicationContext)
+            if (r is com.ercan.heybe.update.Updater.Check.NewVersion) com.ercan.heybe.update.Updater.pending = r.available
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -45,12 +62,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        if (savedInstanceState == null) readIntent(intent)
+        if (savedInstanceState == null) { readIntent(intent); checkUpdate(force = false) }
         val crashFile = (application as HeybeApp).crashFile()
         val lastCrash = if (crashFile.exists()) crashFile.readText().also { crashFile.delete() } else null
         setContent {
             HeybeTheme {
                 HeybeRoot(openRequest) { openRequest = null }
+                com.ercan.heybe.update.UpdateDialog()
                 var crash by remember { mutableStateOf(lastCrash) }
                 crash?.let { text ->
                     AlertDialog(

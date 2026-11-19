@@ -103,8 +103,24 @@ fun SettingsScreen() {
         Text("Değişikliğin paylaş menüsünde görünmesi birkaç saniye sürebilir.", style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
         HorizontalDivider(Modifier.padding(vertical = 16.dp))
-        Text("Uygulama güncellemeleri sonraki adımlarda buraya eklenecek.",
-            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("Uygulama güncellemeleri", style = MaterialTheme.typography.titleMedium)
+        Text("Heybe günde bir yeni sürüm olup olmadığına bakar ve varsa bildirim gönderir. Kurulum uygulamanın içinden yapılır.",
+            style = MaterialTheme.typography.bodyMedium)
+        var updateMsg by remember { mutableStateOf<String?>(null) }
+        Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = {
+                updateMsg = "Denetleniyor…"
+                scope.launch {
+                    updateMsg = when (val r = com.ercan.heybe.update.Updater.check(ctx)) {
+                        is com.ercan.heybe.update.Updater.Check.NewVersion -> { com.ercan.heybe.update.Updater.pending = r.available; "Yeni sürüm bulundu: ${r.available.info.versionName}" }
+                        com.ercan.heybe.update.Updater.Check.UpToDate -> "En güncel sürümü kullanıyorsun."
+                        is com.ercan.heybe.update.Updater.Check.Failed -> r.message
+                    }
+                }
+            }) { Text("Güncellemeleri denetle") }
+            androidx.compose.material3.TextButton(onClick = { com.ercan.heybe.update.Updater.openReleasesPage(ctx) }) { Text("Sürümler sayfası") }
+        }
+        updateMsg?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
         HorizontalDivider(Modifier.padding(vertical = 16.dp))
         Text("Heybe $version", style = MaterialTheme.typography.bodySmall)
     }
